@@ -46,7 +46,7 @@
  *}
  */
 
-#include "crc/crc8.h"
+#include "crc8.h"
 
 static uint8_t crc8_small_table[16] = {
     0x00, 0x07, 0x0e, 0x09, 0x1c, 0x1b, 0x12, 0x15,
@@ -59,8 +59,7 @@ crc8_init(void)
     return 0xff;
 }
 
-uint8_t
-crc8_calc(uint8_t val, void *buf, int cnt)
+uint8_t crc8_calc(uint8_t val, void *buf, int cnt)
 {
 	int i;
 	uint8_t *p = buf;
