@@ -67,7 +67,9 @@ mis_programas/RTOS_II_TP1/out/mis_programas/RTOS_II_TP1/src/RTOS_II_TP1.o: \
  libs/freertos/include/private/deprecated_definitions.h \
  libs/freertos/source/portable/ARM_CM4F/portmacro.h \
  libs/freertos/include/private/mpu_wrappers.h \
- libs/freertos/include/task.h libs/freertos/include/private/list.h \
+ mis_programas/RTOS_II_TP1/inc/Capa2.h \
+ mis_programas/RTOS_II_TP1/inc/vtask.h libs/freertos/include/task.h \
+ libs/freertos/include/private/list.h \
  libs/sapi/sapi_v0.5.2/base/inc/sapi.h \
  libs/sapi/sapi_v0.5.2/base/inc/sapi_datatypes.h \
  libs/lpc_open/boards/edu_ciaa_nxp/inc/board.h \
@@ -129,4 +131,5 @@ mis_programas/RTOS_II_TP1/out/mis_programas/RTOS_II_TP1/src/RTOS_II_TP1.o: \
  libs/sapi/sapi_v0.5.2/external_peripherals/imu/mpu60X0/inc/sapi_imu_mpu60X0.h \
  libs/sapi/sapi_v0.5.2/external_peripherals/memory/eeprom/inc/sapi_eeprom24xx1025.h \
  libs/sapi/sapi_v0.5.2/external_peripherals/ultrasonic/hcsr04/inc/sapi_ultrasonic_hcsr04.h \
+ mis_programas/RTOS_II_TP1/inc/vtask.h \
  mis_programas/RTOS_II_TP1/inc/crc8.h

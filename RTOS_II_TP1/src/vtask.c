@@ -15,16 +15,15 @@
 
 /*=====[Inclusion of own header]=============================================*/
 
-#include "userTasks.h"
+#include "vTasks.h"
 
 /*=====[Inclusions of private function dependencies]=========================*/
-
+#include "Capa2.h"
 #include "sapi.h"       // <= sAPI header
-#include "PWM.h"
 
 /*=====[Definition macros of private constants]==============================*/
 #define UART_PC        UART_USB
-#define UART_BLUETOOTH UART_232
+
 /*=====[Private function-like macros]========================================*/
 
 /*=====[Definitions of private data types]===================================*/
@@ -37,8 +36,6 @@
 
 static char buf[100];
 
-static FATFS fs;      // <-- FatFs work area needed for each volume
-static FIL fp;        // <-- File object needed for each open file
 
 /*=====[Prototypes (declarations) of private functions]======================*/
 

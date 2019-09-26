@@ -33,33 +33,17 @@
 /*
  * Date: 2018-26-09
  */
-#include vtask.h
+#include "vtask.h"
 #include "sapi.h"         /* <= sAPI header */
+#include "Capa2.h"
 
 /* Callbacks - Declaraciones */
 
-void uartUsbReceiveCallback( void *unused );
-void uartUsbSendCallback( void *unused );
 
-void uart232ReceiveCallback( void *unused );
-void uart232SendCallback( void *unused );
 
 /* FUNCION PRINCIPAL, PUNTO DE ENTRADA AL PROGRAMA LUEGO DE RESET. */
-int main(void){
-
+int Capa2 (void){
    /* ------------- INICIALIZACIONES ------------- */
-
-   /* Inicializar la placa */
-   boardConfig();
-
-   /* Inicializar la UART_USB junto con las interrupciones de Tx y Rx */
-   uartConfig(UART_USB, 115200);
-   // Seteo un callback al evento de recepcion y habilito su interrupcion
-   uartCallbackSet(UART_USB, UART_RECEIVE, uartUsbReceiveCallback, NULL);
-   // Seteo un callback al evento de transmisor libre y habilito su interrupcion
-   uartCallbackSet(UART_USB, UART_TRANSMITER_FREE, uartUsbSendCallback, NULL);
-   // Habilito todas las interrupciones de UART_USB
-   uartInterrupt(UART_USB, true);
 
    portTickType xPeriodicity =  10 / portTICK_RATE_MS;
    portTickType xLastWakeTime = xTaskGetTickCount();
@@ -92,25 +76,11 @@ void uartUsbReceiveCallback( void *unused )
    flag1 = TRUE;
 }
 
-// Envio a la PC desde la UART_232
-void uart232SendCallback( void *unused )
-{
-   if(dataToSendToUart232Pending){
-      uartTxWrite(UART_232, dataToSendToUart232);
-      dataToSendToUart232 = 0;
-      dataToSendToUart232Pending = FALSE;
-   }
-}
 
 uint8_t dataToSendToUartUsb = 0;
 bool_t dataToSendToUartUsbPending = FALSE;
 
-// Recibo de la PC en la UART_232
-void uart232ReceiveCallback( void *unused )
-{
-   dataToSendToUartUsb = uartRxRead(UART_232);
-   dataToSendToUartUsbPending = TRUE;
-}
+
 // Envio a la PC desde la UART_USB
 void uartUsbSendCallback( void *unused )
 {

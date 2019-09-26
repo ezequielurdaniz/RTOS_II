@@ -12,8 +12,7 @@
 
 /*=====[Inclusions of public function dependencies]==========================*/
 
-#include "FreeRTOS.h"
-#include "task.h"
+#include "FreeRTOSConfig.h"
 #include "sapi.h"
 
 /*=====[C++ - begin]=========================================================*/
