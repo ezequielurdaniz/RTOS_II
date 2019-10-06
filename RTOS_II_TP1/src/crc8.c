@@ -53,8 +53,7 @@ static uint8_t crc8_small_table[16] = {
     0x38, 0x3f, 0x36, 0x31, 0x24, 0x23, 0x2a, 0x2d
 };
 
-uint8_t
-crc8_init(void)
+uint8_t crc8_init(void)
 {
     return 0xff;
 }
