@@ -1,26 +1,30 @@
-/*=============================================================================
- *
- *  RTOS II : TP 1
- *
- *  Alumnos :
- *
- *  Luciano Perren
- *  Juan Pablo Menditto
- *  Pablo Zizzutti
- *
- *===========================================================================*/
+/*============================================================================
+ * Autores: Luciano Perren       <lgperren@gmail.com>
+ *          Juan Pablo Menditto  <jpmenditto@gmail.com>
+ *          Pablo Zizzutti       <pablozizzutti@gmail.com>
+ * TP1 RTOS 2
+ * Date: 2019/20/08
+ * Docentes: Franco Bucafusco y Sergio Renato De Jesús Melean
+ * app.c
+ *============================================================================*/
 
-#include "FreeRTOS.h"
+//Includes de FreeRTOS
+#include "FreeRTOS.h"				// Motor del SO
 #include "FreeRTOSConfig.h"
 #include "task.h"
-#include "sapi.h"
-#include "crc8.h"
 #include "timers.h"
 #include "queue.h"
+
+// sAPI header
+#include "sapi.h"
+
+#include "crc8.h"
+
 #include "stdio.h"
 #include "ctype.h"
 #include "string.h"
 
+/*==================[definiciones y macros]==================================*/
 #define TIMEOUT_VALIDATION 3 // 100 ms de timeout
 
 #define LED_ROJO     LED2
