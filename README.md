@@ -1,7 +1,7 @@
-----
+
 # RTOS II
 
-Repositorio de la materia de RTOS II - 9na Cohorte
+Repositorio de la materia de RTOS II
 
 
 ### Alumnos
