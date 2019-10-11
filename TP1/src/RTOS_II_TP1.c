@@ -78,11 +78,6 @@ typedef enum{
 
 fsmMemoriaState_t fsmMemoriaState; // Guarda el sector actual disponible de memoria para usar
 
-// Bloques de memoria dinamica
-char* Sector1;
-char* Sector2;
-char* Sector3;
-char* Sector4;
 
 /**********************************************************************************************
  *
@@ -123,7 +118,7 @@ char* MinusToMayus(char *str){
 
 /**********************************************************************************************
  *
- *    Callbacks - Implementaciones
+ *    Callbacks Timers - Implementaciones
  *
  **********************************************************************************************/
 
@@ -149,7 +144,7 @@ void TimeoutCallback(TimerHandle_t xTimer){
 
   char car_recibido;
 
-  const char MensajeError[] = "ERROR\0"; // Mensaje de error para el envio por la queue
+  char MensajeError[] = "ERROR\0"; // Mensaje de error para el envio por la queue
 
   if(xTimer == TimerTimeout){
 
@@ -158,6 +153,7 @@ void TimeoutCallback(TimerHandle_t xTimer){
 		  /* The stop command was not executed successfully.  Take appropriate
 		  action here. */
 	  }
+
 
 	 fsmUARTRXState = StandBy;
 
@@ -192,8 +188,8 @@ void TimeoutCallback(TimerHandle_t xTimer){
 	     // Llego un paquete malo, devuelvo error por el puerto
 		 gpioToggle(LED2);
 
-		 for(int i = 0 ; i < 7; i++){
-			car_recibido = MensajeError[i];
+		 for(int j = 0 ; j < 6; j++){
+			car_recibido = MensajeError[j];
 			xStatusTX = xQueueSend( xQueueRecibe, &car_recibido, 0 );
 		 }
 
@@ -201,11 +197,17 @@ void TimeoutCallback(TimerHandle_t xTimer){
 	 }
 
 	 memset(&bufferin[0], 0, sizeof(bufferin)); // clear the array
-
-
   }
 
 }
+
+/*****************************************************************************************
+ *
+ *
+ *   UART Callback RX
+ *
+ *
+ *****************************************************************************************/
 
 void uartUsbReceiveCallback( void *unused )
 {
@@ -239,6 +241,7 @@ void uartUsbReceiveCallback( void *unused )
 }
 
 /*****************************************************************************************
+ *
  *
  *   UART Callback TX
  *
@@ -310,7 +313,7 @@ void uartUsbSendCallback( void *unused )
 /*****************************************************************************************
  *
  *
- *   Tareas Driver
+ *   Tarea Driver
  *
  *
  *****************************************************************************************/
@@ -330,7 +333,7 @@ void Driver( void* pvParameters )
 	const TickType_t xTicksToWait = 0;
 	bool_t EstadoPaquete;
 
-	const char MensajeError[] = "ERROR\0"; // Mensaje de error para el envio por la queue
+	const char MensajeError[] = "ERROR"; // Mensaje de error para el envio por la queue
 
 	char caracter_in;
 	char caracter_out;
@@ -364,16 +367,19 @@ void Driver( void* pvParameters )
 				  indice++;
 				  lValueToSend[indice] = '\0'; // Agrego el caracter NULL para el envio
 
+				  for(int i = 0 ; i < indice; i++){
+				      caracter_out = lValueToSend[i];
+				      xStatusTX = xQueueSend( xQueueRecibe, &caracter_out, 0 ); // envio datos por Queue
+				   }
+
                }
 			   else
 			   {
-				   lValueToSend = (char*) MensajeError;
+				   for(int j = 0 ; j < 6; j++){
+					 caracter_out = MensajeError[j];
+				     xStatusTX = xQueueSend( xQueueRecibe, &caracter_out, 0 );
+				   }
 			   }
-
-               for(int i = 0 ; i < indice; i++){
-            	   caracter_out = lValueToSend[i];
-              	   xStatusTX = xQueueSend( xQueueRecibe, &caracter_out, 0 ); // envio datos por Queue
-               }
 
                indice = 0;
                memset(&lValueToSend[0], 0, sizeof(lValueToSend)); // clear the array
@@ -430,10 +436,6 @@ int main(void)
    gpioInit( LED_AMARILLO, GPIO_OUTPUT );
    gpioInit( LED_VERDE, GPIO_OUTPUT );
 
-   Sector1 = pvPortMalloc(MEMORIADINAMICA);
-   Sector2 = pvPortMalloc(MEMORIADINAMICA);
-   Sector3 = pvPortMalloc(MEMORIADINAMICA);
-   Sector4 = pvPortMalloc(MEMORIADINAMICA);
 /*
    for(int i = 0 ; i < 100 ; i++){
 	   bufferin[i] = ' ';
