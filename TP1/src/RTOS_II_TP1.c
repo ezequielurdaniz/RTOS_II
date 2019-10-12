@@ -48,7 +48,7 @@ TimerHandle_t TimeToExit;
 QueueHandle_t xQueueEnvia;
 QueueHandle_t xQueueRecibe;
 
-char bufferin[100];  // Variable de recepcionde datos por puerto UART
+char bufferin[100];  // Variable de recepcion de datos por puerto UART
 
 /*-----------------------------------------------------------------------------
  *
@@ -60,10 +60,10 @@ char bufferin[100];  // Variable de recepcionde datos por puerto UART
 typedef enum{
    StandBy,
    Recibiendo,
+   Error,
 } fsmUARTRXState_t;
 
 fsmUARTRXState_t fsmUARTRXState; // Variable para guardar el valor de la maquina de estado
-
 
 // Memoria dinamica
 #define ELEMENTOS_MEMORIA 4
@@ -76,17 +76,6 @@ struct node
 }*front, *rear;
 
 struct node *temp;
-//struct node *temp;
-
-
-
-/**********************************************************************************************
- *
- *   Funciones comunes a todo
- *
- **********************************************************************************************/
-
-
 
 /**********************************************************************************************
  *
@@ -97,14 +86,11 @@ struct node *temp;
 bool_t CheckLettersFnc(char *str){
 
 	 for (int i = 0; str[i] != '\0'; i++){
-
 		 if(!isalpha(str[i])){ // verifica si el caracter es alfabetico
 			 return false;  // devuelve error si encuentra un caracter no alfabetico
 		 }
 	 }
-
 	 return true; // Si llega hasta aca, recorrio toda la cadena y encontro caracteres alfabeticos
-
 }
 
 char* MinusToMayus(char *str){
@@ -112,9 +98,7 @@ char* MinusToMayus(char *str){
 	 for (int i = 0; str[i] != '\0'; i++){
 		 str[i] = toupper((char)(str[i]));
 	 }
-
 	return str;
-
 }
 
 /**********************************************************************************************
@@ -128,10 +112,10 @@ void HeartbeatCallback(TimerHandle_t xTimer){
 }
 
 void TimeToExitCallback(TimerHandle_t xTimer){
-   if(xTimer == TimeToExit){
-	   xTimerStop( TimeToExit , 0 ); // detiene el timer
-	   xTimerReset( TimeToExit , 0 );
-   }
+    if(xTimer == TimeToExit){
+	    xTimerStop( TimeToExit , 0 ); // detiene el timer
+	    xTimerReset( TimeToExit , 0 );
+    }
 }
 
 
@@ -151,15 +135,16 @@ void TimeoutCallback(TimerHandle_t xTimer){
 
 	  if( xTimerStop( TimerTimeout, 0) != pdPASS )
 	  {
-		  /* The stop command was not executed successfully.  Take appropriate
-		  action here. */
+		  /* The stop command was not executed successfully. Take appropriate action here. */
 	  }
+
+	  temp = (struct node*)pvPortMalloc(sizeof(struct node));
 
 	  temp->link = NULL;
 
 	  if (rear  ==  NULL)
 	  {
-	  	 front = rear = temp;
+	  	  front = rear = temp;
 	  }
 	  else
 	  {
@@ -167,11 +152,13 @@ void TimeoutCallback(TimerHandle_t xTimer){
 	  	 rear = temp;
 	  }
 
+	  for(int i = 0 ; i < strlen(bufferin); i++){
+		  temp->datos[i] = bufferin[i];
+	  }
+
 	 fsmUARTRXState = StandBy;
 
 	 indice = strlen(temp->datos);
-	 //uartWriteByte(UART_USB, indice );
-	 //bufferin[indice] = '\0';
 
 	 crc_temp_rx = crc8_calc(0 , temp->datos , indice-1);                  // realizo el calculo del CRC
 
@@ -187,28 +174,29 @@ void TimeoutCallback(TimerHandle_t xTimer){
 
 		 if( xStatusTX == pdPASS ){
 		 	// OK EN EL ENVIO DE LA COLA
-			 gpioToggle(LED3);
 		 }
 		 else
 		 {
 		 	// ERROR ENVIO EN LA COLA
-			gpioToggle(LED1);
 		 }
 	 }
 	 else
 	 {
 	     // Llego un paquete malo, devuelvo error por el puerto
-		 gpioToggle(LED2);
-
 		 for(int j = 0 ; j < 6; j++){
 			car_recibido = MensajeError[j];
 			xStatusTX = xQueueSend( xQueueRecibe, &car_recibido, 0 );
 		 }
-
 		 uartCallbackSet(UART_USB, UART_TRANSMITER_FREE, uartUsbSendCallback, NULL);
 	 }
 
-	 memset(&temp->datos[0], 0, sizeof(temp->datos)); // clear the array
+	  // Liberamos el espacio de memoria
+	 /*temp = front;
+	 front = front->link;
+	 vPortFree(temp);*/
+
+	 memset(&front->datos[0], 0, sizeof(front->datos)); // clear the array
+
   }
 
 }
@@ -223,68 +211,59 @@ void TimeoutCallback(TimerHandle_t xTimer){
 
 void uartUsbReceiveCallback( void *unused )
 {
-
 	static uint8_t indicerx;
 	BaseType_t xHigherPriorityTaskWoken = pdTRUE;
-
 	int cnt;
+	int j;
+    static char temporal;
+    char envio_car;
 
+    BaseType_t xStatusTX;
+    char MensajeError[] = "ERROR, MEMORIA LLENA\0"; // Mensaje de error para el envio por la queue
 
 	// FSM Recepcion de Uart
 	   switch( fsmUARTRXState ){
 
 	         case StandBy:
-	        	 indicerx=0;
-	        	 // Recibimos el primer elemento por UART
-	        	 // Verificar el tamaño de la cola que no sea mas grande que el maximo permitido : ELEMENTOS_MEMORIA
 
+	        	 indicerx=0;
+	        	 // Verificar el tamaño de la cola que no sea mas grande que el maximo permitido : ELEMENTOS_MEMORIA
 	        	 temp = front;
 
-	        	 cnt = 0;
+                 cnt = 0;
 
-	        	 if (front == NULL)
-	        	 {
-	        	   // Envia por callback de tansmision de UART el error, utilizando queue
-	        		 uartWriteString(UART_USB, "Cola Vacia\r\n" );
+	        	 while (temp){
+	        	 	temp = temp->link;
+	        	 	cnt++;
 	        	 }
-	        	 while (temp)
-	        	 {
-	        	    temp = temp->link;
-	        	    cnt++;
-	        	 }
-	        	 uartWriteString(UART_USB, "Tamanio de la cola : " );
-	        	 uartWriteByte(UART_USB, (char) cnt );
-	        	 uartWriteString(UART_USB, "\r\n" );
-
-	        	 gpioToggle(LED1);
 
 	        	 if(cnt == ELEMENTOS_MEMORIA){
-	        		 // Envia por callback de tansmision de UART el error, utilizando queue
-	        		 uartWriteString(UART_USB, "ERROR MEMORIA LLENA\r\n" );
-	        		 // SALIR!!!!
-	        		 break;
+
+	        		 for(j = 0 ; j < 20; j++){
+	        		   envio_car = MensajeError[j];
+	        		   xStatusTX = xQueueSendFromISR( xQueueRecibe, &envio_car, 0 );
+	        		 }
+
+	        		 uartCallbackClr(UART_USB, UART_RECEIVE);
+	        		 uartCallbackSet(UART_USB, UART_TRANSMITER_FREE, uartUsbSendCallback, NULL);
+
+	        		 }
 	        	 }
 
-	        	 gpioToggle(LED2);
-
-	        	 // crea el nuevo elemento en la queue de memoria dinamica
-	        	 temp = (struct node*)pvPortMalloc(sizeof(struct node));
-
-	        	 gpioToggle(LED3);
-
-	        	 temp->datos[indicerx] = uartRxRead(UART_USB);
-	        	 uartWriteByte(UART_USB, temp->datos[indicerx] );
+	        	 // Recibimos el primer elemento por UART
+	        	 bufferin[indicerx] = uartRxRead(UART_USB);
 	        	 //uartWriteByte(UART_USB, bufferin[indicerx] );
 	             xTimerStartFromISR( TimerTimeout , &xHigherPriorityTaskWoken );
 	             fsmUARTRXState = Recibiendo;
 	         break;
 
 	         case Recibiendo:
+
 	        	 xTimerResetFromISR( TimerTimeout , &xHigherPriorityTaskWoken );
 	        	 indicerx++;
-	        	 temp->datos[indicerx] = uartRxRead(UART_USB);
+	        	 bufferin[indicerx] = uartRxRead(UART_USB);
+	        	 //uartWriteByte(UART_USB, bufferin[indicerx] );
 
-	        	// uartWriteByte(UART_USB, temp->datos[indicerx] );
 	        	 // Compruebo que no excede el limite de la memoria dinamica
 	        	 if(indicerx > (MEMORIADINAMICA-1)){
 	        	   // ERROR : se supero el limite de memoria para un paquete
@@ -306,12 +285,12 @@ void uartUsbReceiveCallback( void *unused )
 
 void uartUsbSendCallback( void *unused )
 {
+
 	uint8_t crc_temp_tx;
-
 	char caracter_in;
-
-	char lReceivedValue[MEMORIADINAMICA];
-	uint8_t indice = 0;
+	static char lReceivedValue[MEMORIADINAMICA];
+	static uint8_t indice = 0;
+	BaseType_t xHigherPriorityTaskWoken = pdTRUE;
 
 	 // Recepcion de los datos de la queue
 
@@ -320,51 +299,28 @@ void uartUsbSendCallback( void *unused )
 		 /* Se recibe un caracter y se almacena */
 		 lReceivedValue[indice] = caracter_in;
 
-		 if(lReceivedValue[indice] != '\0'){
-		     /* Final del mensaje*/
+		  if(lReceivedValue[indice] != '\0'){
+		     /* Final del mensaje */
 			 uartWriteByte(UART_USB, caracter_in );
 			 indice++;
-
 		  }
 		  else
 		  {
+			 // Calcula el CRC8
+			 // Al dato recibido, se le agrega el crc8 y se reenvia por uart
+
+			 crc_temp_tx = crc8_calc(0 , lReceivedValue , strlen(lReceivedValue)); // realizo el calculo del CRC8
+			 uartWriteByte(UART_USB, crc_temp_tx);                                 // envio el CRC por UART
+
 			 indice = 0;
+
 			 memset(&lReceivedValue[0], 0, sizeof(lReceivedValue)); // clear the array
 			 uartWriteByte(UART_USB, '\r' );
 			 uartWriteByte(UART_USB, '\n' );
 			 uartCallbackClr( UART_USB, UART_TRANSMITER_FREE);
-			 vPortFree(temp);
-		 }
-
+			// xTimerStartFromISR( TimeToExit , xHigherPriorityTaskWoken );
+		  }
 	 }
-
-
-	 /*
-
-	    	 if( xStatusRX == pdPASS ){
-	    		 //gpioToggle(LED1);
-	    	   	 pDataToSend = lReceivedValue;       // copio el contenido de la queue a la variable para envio por uart
-
-	    	 // Al dato recibido, se le agrega el crc8 y se reenvia por uart
-	    	 crc_temp_tx = crc8_calc(0 , pDataToSend , strlen(pDataToSend) ); // realizo el calculo del CRC8
-
-	   	     pDataToSend[strlen(pDataToSend)] = (char) crc_temp_tx;  		  // en la ultima posicion coloco el CRC8
-	   	     pDataToSend[strlen(pDataToSend) + 1] = '\0';            		  // agrego el caracter nulo que fue sobreescrito
-	   	    		    	 		 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	  // en la operacion anterior
-	   	     crc_temp_tx = 0;										 	      // borro la variable temporal de calculo CRC8 de TX
-
-	  		   for(int i = 0 ; pDataToSend[i] != '\0' ; i++){
-	  		        uartTxWrite(UART_USB, pDataToSend[i] );
-	  		   }
-	  		   uartCallbackClr( UART_USB, UART_TRANSMITER_FREE);
-
-	    	 }
-	    	 else
-	    	 {
-	    		 // ERROR ENVIO EN LA COLA
-	    	 }
-*/
-	    	   //xTimerStart( TimeToExit , 0 );
 }
 
 /*****************************************************************************************
@@ -446,8 +402,8 @@ void Driver( void* pvParameters )
 			}
         }
     }
-
 }
+
 
 /*****************************************************************************************
  *
