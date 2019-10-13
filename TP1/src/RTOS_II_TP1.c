@@ -107,6 +107,20 @@ char* MinusToMayus(char *str){
  *
  **********************************************************************************************/
 
+void EliminaBloqueMemoriaDinamica(){
+
+	struct node *temp;
+	// borro la memoria dinamica
+	// Problema resuelto : se borro el bloque de memoria para no dejar basura en la proxima
+	// transaccion
+	uartCallbackSet(UART_USB, UART_TRANSMITER_FREE, uartUsbSendCallback, NULL);
+
+	memset(&front->datos[0], 0, sizeof(front->datos));                     // clear the array
+	temp = front;
+	front = front->link;
+	vPortFree(temp);
+}
+
 bool_t VerificaColaLlena(){
 
 	 struct node *temporal;
@@ -120,11 +134,11 @@ bool_t VerificaColaLlena(){
 		temporal = temporal->link;
 		cnt++;
 	 }
-
+/*
 	 uartWriteString(UART_USB, "Tamanio cola : ");
 	 uartWriteByte(UART_USB, cnt );
 	 uartWriteByte(UART_USB, '\r' );
-	 uartWriteByte(UART_USB, '\n' );
+	 uartWriteByte(UART_USB, '\n' );*/
 
 
 	 if(cnt == ELEMENTOS_MEMORIA){
@@ -164,7 +178,7 @@ void TimeoutCallback(TimerHandle_t xTimer){
   char caracter_out;
   struct node *temp;
 
-  char Error[] = "ERROR "; // Mensaje de error para el envio por la queue
+  char Error[] = "ERROR1 "; // Mensaje de error para el envio por la queue
   char ErrorCola[] = "ERROR COLA LLENA "; // Mensaje de error para el envio por la queue
 
   if(xTimer == TimerTimeout){
@@ -202,7 +216,7 @@ void TimeoutCallback(TimerHandle_t xTimer){
 
 	 temp->link = NULL;
 
-	 if(rear == NULL){
+	 if(front == NULL){
 	  	 front = rear = temp;
 	     gpioToggle(LED1);
 	 }
@@ -218,7 +232,7 @@ void TimeoutCallback(TimerHandle_t xTimer){
 		  front->datos[i] = bufferin[i];
 	 }
 
-	 gpioToggle(LED3);
+	 //gpioToggle(LED3);
 
 	 indice = strlen(front->datos);
 
@@ -245,20 +259,19 @@ void TimeoutCallback(TimerHandle_t xTimer){
 	 else
 	 {
 	     // Llego un paquete malo, devuelvo error por el puerto
-		 Error[5] = '\0';
-		 for(int j = 0 ; j < 6; j++){
+		 Error[6] = '\0';
+
+		 for(int j = 0 ; j < 7; j++){
 			caracter_out = Error[j];
 			xStatusTX = xQueueSend( xQueueRecibe, &caracter_out, 0 );
-		 }
-		 uartCallbackSet(UART_USB, UART_TRANSMITER_FREE, uartUsbSendCallback, NULL);
 
+		 }
+		 EliminaBloqueMemoriaDinamica();
 	 }
 
 	 memset(&bufferin[0], 0, sizeof(bufferin));
-	  //memset(&front->datos[0], 0, sizeof(front->datos)); // clear the array
 
   }
-
 }
 
 /*****************************************************************************************
@@ -273,9 +286,12 @@ void uartUsbReceiveCallback( void *unused )
 {
 	static uint8_t indicerx;
 	BaseType_t xHigherPriorityTaskWoken = pdTRUE;
+	char Error[] = "ERROR LIMITE EXCEDIDO "; // Mensaje de error para el envio por la queue
+	char caracter_out;
+	BaseType_t xStatusTX;
 
 	// FSM Recepcion de Uart
-	   switch( fsmUARTRXState ){
+	switch( fsmUARTRXState ){
 
 	         case StandBy:
 
@@ -289,21 +305,31 @@ void uartUsbReceiveCallback( void *unused )
 	         break;
 
 	         case Recibiendo:
-
-	        	 xTimerResetFromISR( TimerTimeout , &xHigherPriorityTaskWoken );
-	        	 indicerx++;
-	        	 bufferin[indicerx] = uartRxRead(UART_USB);
-	        	 //uartTxWrite(UART_USB, bufferin[indicerx] );
-
 	        	 // Compruebo que no excede el limite de la memoria dinamica
 	        	 if(indicerx > (MEMORIADINAMICA-1)){
-	        	   // ERROR : se supero el limite de memoria para un paquete
+	        	 	// ERROR : se supero el limite de memoria para un paquete
+	        		Error[21] = '\0';
+
+	        		for(int j = 0 ; j < 22; j++){
+	        		 	caracter_out = Error[j];
+	        		 	xStatusTX = xQueueSendFromISR( xQueueRecibe, &caracter_out, 0 );
+	        		}
+
+	        		xTimerStopFromISR( TimerTimeout , &xHigherPriorityTaskWoken );
+	        		memset(&bufferin[0], 0, sizeof(bufferin));
+	        		uartCallbackSet(UART_USB, UART_TRANSMITER_FREE, uartUsbSendCallback, NULL);
+	        		fsmUARTRXState = StandBy;
+
+	        	 }
+	        	 else
+	        	 {
+	        		 xTimerResetFromISR( TimerTimeout , &xHigherPriorityTaskWoken );
+	        		 indicerx++;
+	        		 bufferin[indicerx] = uartRxRead(UART_USB);
+	        		 //uartTxWrite(UART_USB, bufferin[indicerx] );
 	        	 }
 	         break;
-
-
- 	   }
-
+ 	}
 }
 
 /*****************************************************************************************
@@ -316,7 +342,6 @@ void uartUsbReceiveCallback( void *unused )
 
 void uartUsbSendCallback( void *unused )
 {
-
 	char crc_temp_tx;
 	char caracter_in;
 	static char lReceivedValue[MEMORIADINAMICA];
@@ -433,32 +458,7 @@ void Driver( void* pvParameters )
                indice = 0;
                memset(&lValueToSend[0], 0, sizeof(lValueToSend));                      // clear the array
                memset(&lReceivedValue[0], 0, sizeof(lReceivedValue));                  // clear the array
-               uartCallbackSet(UART_USB, UART_TRANSMITER_FREE, uartUsbSendCallback, NULL);
-
-               // borro la memoria dinamica
-
-               temp = front;
-               front = front->link;
-
-               vPortFree(temp);
-
-
-
-
-
-
-               if(rear == NULL){
-              	  	 front = rear = temp;
-              	 }
-              	 else
-              	 {
-              	  	 rear->link = temp;
-              	  	 rear = temp;
-              	 }
-
-
-
-               VerificaColaLlena();
+               EliminaBloqueMemoriaDinamica();
 
 			}
         }
@@ -474,20 +474,20 @@ void Driver( void* pvParameters )
  *
  *****************************************************************************************/
 
-void uartDriverInit(void) {
+void uartDriverInit(uartMap_t uart) {
 
 	/* Inicializar la UART_USB junto con las interrupciones de Tx y Rx */
-	uartConfig(UART_USB, 115200);
+	uartConfig(uart, 115200);
 	// Seteo un callback al evento de recepcion y habilito su interrupcion
-	uartCallbackSet(UART_USB, UART_RECEIVE, uartUsbReceiveCallback, NULL);
+	uartCallbackSet(uart, UART_RECEIVE, uartUsbReceiveCallback, NULL);
 	// Seteo un callback al evento de transmisor libre y habilito su interrupcion
-	uartCallbackSet(UART_USB, UART_TRANSMITER_FREE, uartUsbSendCallback, NULL);
+	uartCallbackSet(uart, UART_TRANSMITER_FREE, uartUsbSendCallback, NULL);
 	// Habilito todas las interrupciones de UART_USB
-	uartInterrupt(UART_USB, true);
+	uartInterrupt(uart, true);
 	// Clear el callback para transmision del UART
-	uartCallbackClr(UART_USB, UART_TRANSMITER_FREE);
+	uartCallbackClr(uart, UART_TRANSMITER_FREE);
 	// Mensaje de inicio
-	uartWriteString(UART_USB, "Iniciando...\r\n");
+	uartWriteString(uart, "Iniciando...\r\n");
 
 }
 
@@ -504,7 +504,7 @@ int main(void)
    /* Inicializar la placa */
    boardConfig();
 
-   uartDriverInit();
+   uartDriverInit(UART_USB);
 
    gpioInit( LED_ROJO, GPIO_OUTPUT );
    gpioInit( LED_AMARILLO, GPIO_OUTPUT );
