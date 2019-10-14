@@ -17,46 +17,38 @@
  * under the License.
  */
 
-/*
- * Table computation:
- *
- * void
- * gen_small_table(uint8_t poly)
- * {
- *      int i;
- *	int j;
- *	uint8_t curr;
- *
- *	for (i = 0; i < 16; i++) {
- *		curr = i;
- *
- *		for (j = 0; j < 8; j++)  {
- *			if ((curr & 0x80) != 0) {
- *				curr = (curr << 1) ^ poly;
- *			} else {
- *				curr <<= 1;
- *			}
- *		}
- *
- *		small_table[i] = curr;
- *
- *		printf("0x%x, ", small_table[i]);
- *	}
- *	printf("\n");
- *}
- */
-
 #include "crc8.h"
+#include "string.h"
 
 static uint8_t crc8_small_table[16] = {
     0x00, 0x07, 0x0e, 0x09, 0x1c, 0x1b, 0x12, 0x15,
     0x38, 0x3f, 0x36, 0x31, 0x24, 0x23, 0x2a, 0x2d
 };
 
+/*!
+ * @brief  CRC8 Init
+ *
+ * @param[in] void
+ *
+ * @return  uint8_t
+ */
+
+
 uint8_t crc8_init(void)
 {
     return 0xff;
 }
+
+/*!
+ * @brief  Calcula el CRC8 de un string
+ *
+ * @param[in] val
+ * @param[in] *buf
+ * @param[in] *cnt
+ *
+ * @return  uint8_t
+ */
+
 
 uint8_t crc8_calc(uint8_t val, void *buf, int cnt)
 {
@@ -70,3 +62,27 @@ uint8_t crc8_calc(uint8_t val, void *buf, int cnt)
 	}
 	return val;
 }
+
+/*!
+ * @brief  Calcula el CRC8 del string y lo suma en la ultima posicion
+ *
+ * @param[in] char*
+ *
+ * @return  char*
+ */
+
+
+char* CalculaCRC8(char *str){
+
+	uint8_t indice;
+
+	uint8_t crc = crc8_calc(0 , str , strlen(str)); // realizo el calculo del CRC8
+
+	indice = strlen(str);						    // calcula el largo del str
+
+	str[indice] = crc;   // le agrega el CRC8
+	str[indice+1] = '\0';		    // le agrega el caracter fin de linea
+
+	return str;
+}
+

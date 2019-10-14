@@ -32,6 +32,7 @@ extern "C" {
 
 uint8_t crc8_init(void);
 uint8_t crc8_calc(uint8_t val, void *buf, int cnt);
+char* CalculaCRC8(char * str);
 
 #ifdef __cplusplus
 }
