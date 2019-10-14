@@ -27,13 +27,17 @@
 #define LED_AMARILLO  LED1
 #define LED_VERDE     LED3
 
-#define MEMORIADINAMICA 100
+#define MEMORIADINAMICA 25
 
 bool_t CheckLettersFnc(char *str);
 char* MinusToMayus(char *str);
+void EliminaBloqueMemoriaDinamica();
+bool_t VerificaColaLlena();
+void uartDriverInit(uartMap_t uart);
 
 void HeartbeatCallback(TimerHandle_t xTimer);
 void TimeoutCallback(TimerHandle_t xTimer);
+void TimeToExitCallback(TimerHandle_t xTimer);
 
 void uartUsbReceiveCallback( void *unused );
 void uartUsbSendCallback( void *unused );
@@ -60,7 +64,7 @@ char bufferin[100];  // Variable de recepcion de datos por puerto UART
 typedef enum{
    StandBy,
    Recibiendo,
-   Error,
+   ErrorLimite,
 } fsmUARTRXState_t;
 
 fsmUARTRXState_t fsmUARTRXState; // Variable para guardar el valor de la maquina de estado
@@ -77,7 +81,7 @@ struct node
 
 /**********************************************************************************************
  *
- *   Funciones capa 3
+ *   Funciones
  *
  **********************************************************************************************/
 
@@ -121,6 +125,14 @@ void EliminaBloqueMemoriaDinamica(){
 	vPortFree(temp);
 }
 
+/**********************************************************************************************
+ *
+ *
+ *
+ *
+ *
+ **********************************************************************************************/
+
 bool_t VerificaColaLlena(){
 
 	 struct node *temporal;
@@ -134,12 +146,6 @@ bool_t VerificaColaLlena(){
 		temporal = temporal->link;
 		cnt++;
 	 }
-/*
-	 uartWriteString(UART_USB, "Tamanio cola : ");
-	 uartWriteByte(UART_USB, cnt );
-	 uartWriteByte(UART_USB, '\r' );
-	 uartWriteByte(UART_USB, '\n' );*/
-
 
 	 if(cnt == ELEMENTOS_MEMORIA){
          return TRUE;
@@ -178,8 +184,9 @@ void TimeoutCallback(TimerHandle_t xTimer){
   char caracter_out;
   struct node *temp;
 
-  char Error[] = "ERROR1 "; // Mensaje de error para el envio por la queue
-  char ErrorCola[] = "ERROR COLA LLENA "; // Mensaje de error para el envio por la queue
+  char Error[] = "ERROR1 ";                 // Mensaje de error para el envio por la queue
+  char ErrorCola[] = "ERROR COLA LLENA ";  // Mensaje de error para el envio por la queue
+  char ErrorLim[] = "ERROR LIMITE EXCEDIDO "; // Mensaje de error para el envio por la queue
 
   if(xTimer == TimerTimeout){
 
@@ -187,6 +194,21 @@ void TimeoutCallback(TimerHandle_t xTimer){
 	 {
 		  /* The stop command was not executed successfully. Take appropriate action here. */
 	 }
+	 gpioToggle(LED1);
+	 // Si se produjo un error por exceder el limite de caracteres de recepcion
+	 if(fsmUARTRXState==ErrorLimite){
+		 ErrorLim[21]='\0';
+		 for(int j = 0 ; j < 22; j++){
+		    caracter_out = ErrorLim[j];
+		    xStatusTX = xQueueSend( xQueueRecibe, &caracter_out, 0 );
+		 }
+
+		 // activa el callback de TX UART
+		 memset(&bufferin[0], 0, sizeof(bufferin));                                    // clear the array bufferin
+		 uartCallbackSet(UART_USB, UART_TRANSMITER_FREE, uartUsbSendCallback, NULL);
+		 fsmUARTRXState = StandBy;
+		 return;// Sale del callback del timer
+     }
 
 	 // Verifica si la cola esta llena, si es asi, avisa por callback de salida que no puede recibir mas datos
 	 // de lo contrario tratara de procesar el paquete entrante
@@ -195,7 +217,7 @@ void TimeoutCallback(TimerHandle_t xTimer){
 	 ColaLlena=VerificaColaLlena();
 
      if(ColaLlena==TRUE){
-       ErrorCola[16] = '\0';
+       ErrorCola[16]='\0';
        for(int j = 0 ; j < 17; j++){
     	 caracter_out = ErrorCola[j];
       	 xStatusTX = xQueueSend( xQueueRecibe, &caracter_out, 0 );
@@ -218,13 +240,11 @@ void TimeoutCallback(TimerHandle_t xTimer){
 
 	 if(front == NULL){
 	  	 front = rear = temp;
-	     gpioToggle(LED1);
 	 }
 	 else
 	 {
 	  	 rear->link = temp;
 	  	 rear = temp;
-	  	 gpioToggle(LED2);
 	 }
 
 	 // Copia el contenido del buffer entrante de datos en el dato que ira al frente
@@ -260,12 +280,11 @@ void TimeoutCallback(TimerHandle_t xTimer){
 	 {
 	     // Llego un paquete malo, devuelvo error por el puerto
 		 Error[6] = '\0';
-
-		 for(int j = 0 ; j < 7; j++){
+		 for(int j = 0 ; j < 7 ; j++){
 			caracter_out = Error[j];
 			xStatusTX = xQueueSend( xQueueRecibe, &caracter_out, 0 );
-
 		 }
+
 		 EliminaBloqueMemoriaDinamica();
 	 }
 
@@ -286,9 +305,7 @@ void uartUsbReceiveCallback( void *unused )
 {
 	static uint8_t indicerx;
 	BaseType_t xHigherPriorityTaskWoken = pdTRUE;
-	char Error[] = "ERROR LIMITE EXCEDIDO "; // Mensaje de error para el envio por la queue
-	char caracter_out;
-	BaseType_t xStatusTX;
+	char Caracter;
 
 	// FSM Recepcion de Uart
 	switch( fsmUARTRXState ){
@@ -307,19 +324,7 @@ void uartUsbReceiveCallback( void *unused )
 	         case Recibiendo:
 	        	 // Compruebo que no excede el limite de la memoria dinamica
 	        	 if(indicerx > (MEMORIADINAMICA-1)){
-	        	 	// ERROR : se supero el limite de memoria para un paquete
-	        		Error[21] = '\0';
-
-	        		for(int j = 0 ; j < 22; j++){
-	        		 	caracter_out = Error[j];
-	        		 	xStatusTX = xQueueSendFromISR( xQueueRecibe, &caracter_out, 0 );
-	        		}
-
-	        		xTimerStopFromISR( TimerTimeout , &xHigherPriorityTaskWoken );
-	        		memset(&bufferin[0], 0, sizeof(bufferin));
-	        		uartCallbackSet(UART_USB, UART_TRANSMITER_FREE, uartUsbSendCallback, NULL);
-	        		fsmUARTRXState = StandBy;
-
+	        		fsmUARTRXState = ErrorLimite;
 	        	 }
 	        	 else
 	        	 {
@@ -328,6 +333,11 @@ void uartUsbReceiveCallback( void *unused )
 	        		 bufferin[indicerx] = uartRxRead(UART_USB);
 	        		 //uartTxWrite(UART_USB, bufferin[indicerx] );
 	        	 }
+	         break;
+
+	         case ErrorLimite:
+	        	 xTimerResetFromISR( TimerTimeout , &xHigherPriorityTaskWoken );
+	        	 Caracter = uartRxRead(UART_USB);
 	         break;
  	}
 }
