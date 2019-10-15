@@ -374,7 +374,6 @@ SYMBOL TABLE:
 1a003832 g     F .text	00000018 uartWriteString
 10002dec g     O .bss	00000004 SystemCoreClock
 1a002ab0 g     F .text	00000054 Chip_UART_Init
-10002d30 g     O .bss	00000064 bufferin
 1a0001ba  w    F .text	00000002 ADC0_IRQHandler
 1a002768 g     F .text	0000005c vPortValidateInterruptPriority
 1a000180  w    F .text	00000002 UsageFault_Handler
@@ -393,6 +392,7 @@ SYMBOL TABLE:
 1a003d32 g     F .text	0000000a GPIO1_IRQHandler
 1a001204 g     F .text	00000158 xQueueReceive
 10002dac g     O .bss	00000040 xQueueRegistry
+10002d30 g     O .bss	00000064 memDinIn
 1a00152c g     F .text	00000018 vApplicationGetTimerTaskMemory
 1a0001ba  w    F .text	00000002 SSP0_IRQHandler
 1a00550c g       .ARM.exidx	00000000 __exidx_start
@@ -1520,7 +1520,7 @@ bool_t VerificaColaLlena(){
 
 void BorrarBufferIn(){
 1a000664:	b508      	push	{r3, lr}
-	memset(&bufferin[0], 0, sizeof(bufferin));
+	memset(&memDinIn[0], 0, sizeof(memDinIn));
 1a000666:	2264      	movs	r2, #100	; 0x64
 1a000668:	2100      	movs	r1, #0
 1a00066a:	4802      	ldr	r0, [pc, #8]	; (1a000674 <BorrarBufferIn+0x10>)
@@ -1638,7 +1638,7 @@ void TimeoutCallback(TimerHandle_t xTimer){
 1a000728:	2020      	movs	r0, #32
 1a00072a:	f000 fa1f 	bl	1a000b6c <pvPortMalloc>
 1a00072e:	4605      	mov	r5, r0
-	 for(int i = 0 ; i < strlen(bufferin); i++){
+	 for(int i = 0 ; i < strlen(memDinIn); i++){
 1a000730:	2400      	movs	r4, #0
 1a000732:	e014      	b.n	1a00075e <TimeoutCallback+0x6e>
 		 gpioToggle(LED2);
@@ -1661,11 +1661,11 @@ void TimeoutCallback(TimerHandle_t xTimer){
 1a000750:	f7ff ff88 	bl	1a000664 <BorrarBufferIn>
        return;// Sale del callback del timer
 1a000754:	e7d2      	b.n	1a0006fc <TimeoutCallback+0xc>
-		 temp->datos[i] = bufferin[i]; // copia el contenido del buffer entrante en ultimo elemento de la cola dinamica
+		 temp->datos[i] = memDinIn[i]; // copia el contenido del buffer entrante en ultimo elemento de la cola dinamica
 1a000756:	4b0f      	ldr	r3, [pc, #60]	; (1a000794 <TimeoutCallback+0xa4>)
 1a000758:	5d1b      	ldrb	r3, [r3, r4]
 1a00075a:	552b      	strb	r3, [r5, r4]
-	 for(int i = 0 ; i < strlen(bufferin); i++){
+	 for(int i = 0 ; i < strlen(memDinIn); i++){
 1a00075c:	3401      	adds	r4, #1
 1a00075e:	480d      	ldr	r0, [pc, #52]	; (1a000794 <TimeoutCallback+0xa4>)
 1a000760:	f003 ffbf 	bl	1a0046e2 <strlen>
@@ -1798,7 +1798,7 @@ void uartUsbReceiveCallback( void *unused )
 1a000822:	2400      	movs	r4, #0
 1a000824:	4b24      	ldr	r3, [pc, #144]	; (1a0008b8 <uartUsbReceiveCallback+0xb0>)
 1a000826:	701c      	strb	r4, [r3, #0]
-	        	 bufferin[indicerx] = uartRxRead(UART_USB);
+	        	 memDinIn[indicerx] = uartRxRead(UART_USB);
 1a000828:	2003      	movs	r0, #3
 1a00082a:	f002 ffa3 	bl	1a003774 <uartRxRead>
 1a00082e:	4b23      	ldr	r3, [pc, #140]	; (1a0008bc <uartUsbReceiveCallback+0xb4>)
@@ -1846,7 +1846,7 @@ void uartUsbReceiveCallback( void *unused )
 1a00087c:	3401      	adds	r4, #1
 1a00087e:	b2e4      	uxtb	r4, r4
 1a000880:	701c      	strb	r4, [r3, #0]
-	        		 bufferin[indicerx] = uartRxRead(UART_USB);
+	        		 memDinIn[indicerx] = uartRxRead(UART_USB);
 1a000882:	2003      	movs	r0, #3
 1a000884:	f002 ff76 	bl	1a003774 <uartRxRead>
 1a000888:	4b0c      	ldr	r3, [pc, #48]	; (1a0008bc <uartUsbReceiveCallback+0xb4>)

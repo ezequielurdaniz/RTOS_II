@@ -43,7 +43,7 @@
 
 /*=====[Definitions of private global variables]=============================*/
 
-char bufferin[100];  // Variable de recepcion de datos por puerto UART       // <-- File object needed for each open file
+char memDinIn[100];  // Variable de recepcion de datos por puerto UART       // <-- File object needed for each open file
 
 /*=====[Prototypes (declarations) of private functions]======================*/
 
@@ -133,8 +133,8 @@ void TimeoutCallback(TimerHandle_t xTimer){
      // Creo el bloque de memoria dinamica
 	 temp = (struct node*)pvPortMalloc(sizeof(struct node));
 	 // Copia el contenido del buffer entrante de datos en el dato que ira al frente
-	 for(int i = 0 ; i < strlen(bufferin); i++){
-		 temp->datos[i] = bufferin[i]; // copia el contenido del buffer entrante en ultimo elemento de la cola dinamica
+	 for(int i = 0 ; i < strlen(memDinIn); i++){
+		 temp->datos[i] = memDinIn[i]; // copia el contenido del buffer entrante en ultimo elemento de la cola dinamica
 	 }
 
 	 BorrarBufferIn();
@@ -224,7 +224,7 @@ bool_t VerificaColaLlena(){
  */
 
 void BorrarBufferIn(){
-	memset(&bufferin[0], 0, sizeof(bufferin));
+	memset(&memDinIn[0], 0, sizeof(memDinIn));
 }
 
 /*!
