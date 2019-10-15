@@ -1,0 +1,2 @@
+RTOSII/RTOS_II/TP1/out/RTOSII/RTOS_II/TP1/src/crc8.o: \
+ RTOSII/RTOS_II/TP1/src/crc8.c RTOSII/RTOS_II/TP1/inc/crc8.h
