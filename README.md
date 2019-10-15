@@ -3,7 +3,7 @@ Repositorio de la materia de RTOS II
 
 ## Descripción:
 - trabajos practicos de RTOS 2 Nro1 y Nro1.
-- Link [Condiciones de aprobación]( https://docs.google.com/ poner nuestro link que no lo pude abrir).
+- Link [Condiciones de aprobación]( https://drive.google.com/drive/folders/14kG0asygjdLQRMK713hIFkTuAyrfpYos ).
 
 ## Alumnos:
  *  Luciano Perren
