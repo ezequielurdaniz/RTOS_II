@@ -90,6 +90,7 @@ void Driver( void* pvParameters )
 
 	char caracter_in;
 	int TamCola;
+	int ComandoOA;
 
 	uint8_t crc_temp_rx;
 	uint8_t crc_temp_tx;
@@ -108,12 +109,20 @@ void Driver( void* pvParameters )
     	  TamCola=TamanioCola();
        }
 
+       // guarda en la variable que comando llego para realizar la aplicacion de la OA
+       ComandoOA=front->datos[0];
+
+       // Acomoda los datos para seleccionar solo los mismos
+       for(int i = 0 ; i < strlen(front->datos); i++){
+    	     front->datos[i] = front->datos[i+1];
+       }
+
        // Guardo en indice la cantidad de datos que recibi por el puerto serie
        indice = strlen(front->datos);
+       indice--; // acomodo el indice
 
        // realizo el calculo del CRC para verificar el dato entrante
        crc_temp_rx = crc8_calc(0 , front->datos , indice-1);
-
 
    	   // chequeo que el CRC8 calculado sea igual al CRC8 entrante con los datos por el puerto serie
    	   if(crc_temp_rx == front->datos[indice-1]){

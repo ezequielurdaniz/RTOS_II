@@ -91,6 +91,8 @@ void TimeoutCallback(TimerHandle_t xTimer){
 
   struct node *temp;
 
+  uint8_t indice = 0;
+
   if(xTimer == TimerTimeout){
 
 	 if( xTimerStop( TimerTimeout, 0) != pdPASS )
@@ -125,6 +127,24 @@ void TimeoutCallback(TimerHandle_t xTimer){
        return;// Sale del callback del timer
      }
 
+     // Guardo en indice la cantidad de datos que recibi por el puerto serie
+     indice = strlen(bufferin);
+
+     // Verifica que el nuevo paquete contiene los delimitadores y el elemento de control
+     // sino devuelve un error por UART
+     if(bufferin[0]=='[' && (bufferin[1]=='1' || bufferin[1]=='2') && bufferin[indice-1]==']'){
+        // OK!
+    	// gpioToggle(LED3);
+     }
+     else
+     {
+    	 EnvioErrorUartdDelim();
+	     // activa el callback de TX UART
+	     BorrarBufferIn();           // clear the array bufferin
+	     return;                     // Sale del callback del timer
+     }
+     //
+
      //--------------------------------------------------------------------------------------------------------
      // en el caso que haya memoria en el sistema, crea un nuevo bloque de memoria en la cola de memorias dinamicas
      // y acomoda los punteros de la cola dinamica de memorias
@@ -132,9 +152,10 @@ void TimeoutCallback(TimerHandle_t xTimer){
 
      // Creo el bloque de memoria dinamica
 	 temp = (struct node*)pvPortMalloc(sizeof(struct node));
-	 // Copia el contenido del buffer entrante de datos en el dato que ira al frente
-	 for(int i = 0 ; i < strlen(bufferin); i++){
-		 temp->datos[i] = bufferin[i]; // copia el contenido del buffer entrante en ultimo elemento de la cola dinamica
+	 // Copia el contenido del buffer entrante de datos en el dato que ira al frente, quita los [ ]
+	 // en la proxima etapa leera los comandos 1 y 2 del objeto activo
+	 for(int i = 0 ; i < strlen(bufferin) - 1; i++){
+		 temp->datos[i] = bufferin[i+1]; // copia el contenido del buffer entrante en ultimo elemento de la cola dinamica
 	 }
 
 	 BorrarBufferIn();
@@ -273,6 +294,30 @@ void EnvioErrorUart(){
 	// Inicia el timer de salida
 	xTimerStart( TimeToExit , 0 );
 	EliminaBloqueMemoriaDinamica();
+}
+
+/*!
+ * @brief  Envia por UART el mensaje de ERROR por limite de caracteres o cola llena
+ *
+ * @param[in] void
+ *
+ * @return  void
+ */
+
+void EnvioErrorUartdDelim(){
+
+	BaseType_t xStatusTX;    // Variable de status de la queue
+	char Error[] = "ERROR LIM "; // Mensaje de error para el envio por la queue
+	char caracter_out;
+
+	Error[9] = '\0';
+	for(int j = 0 ; j < 10; j++){
+	   	  caracter_out = Error[j];
+	   	  xStatusTX = xQueueSend( xQueueRecibe, &caracter_out, 0 );
+	}
+	// Inicia el timer de salida
+	xTimerStart( TimeToExit , 0 );
+	uartCallbackSet(UART_USB, UART_TRANSMITER_FREE, uartUsbSendCallback, NULL);
 }
 
 

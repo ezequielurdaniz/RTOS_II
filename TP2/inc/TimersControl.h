@@ -70,6 +70,7 @@ bool_t VerificaColaLlena();
 void BorrarBufferIn();
 void EnvioErrorUartLim();
 void EnvioErrorUart();
+void EnvioErrorUartdDelim();
 
 
 
