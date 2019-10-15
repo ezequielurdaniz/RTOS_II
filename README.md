@@ -2,7 +2,7 @@
 Repositorio de la materia de RTOS II
 
 ## Descripción:
-- trabajos practicos de RTOS 2 Nro1 y Nro1.
+- trabajos practicos de RTOS 2 N°1 y N°2.
 - Link [Condiciones de aprobación]( https://github.com/pablozizzutti/RTOS_II/blob/master/RTOS%202%20-%20Condici%C3%B3n%20de%20aprobaci%C3%B3n.pdf ).
 
 ## Alumnos:
@@ -15,8 +15,6 @@ Repositorio de la materia de RTOS II
 - Estructura del proyecto:
   - ejercicio1: Carpeta con el código para TP1
   - ejercicio2: Carpeta con el código para TP2.
-  - enviar_texto.py: Script de prueba. (ACA PODEMOS PONER UN TXT CON PRUEBAS!!! SI TENEMOS TIEMPO)
-  - texto:  Texto de prueba, para comprobar funcionalidad del programa.
   - README.md: Este documento.
 
 ## Consideraciones de diseño
@@ -24,7 +22,6 @@ Repositorio de la materia de RTOS II
 
   - 0.Convertir los datos recibidos a mayúsculas.
   - 1.Convertir los datos recibidos a minúsculas.
-  - ACA SE PUEDE AGREGAR ALGUNA FUNCIONALIDAD O RESPUESTA QUE ENVIA EL PROGRAM
 
 # Documentación
 
