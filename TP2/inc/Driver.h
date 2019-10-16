@@ -64,7 +64,7 @@ struct node
 QueueHandle_t xQueueEnvia;
 QueueHandle_t xQueueRecibe;
 
-char bufferin[100];  // Variable de recepcion de datos por puerto UART       // <-- File object needed for each open file
+char memDinIn[MEMORIADINAMICA];  // Variable de recepcion de datos por puerto UART       // <-- File object needed for each open file
 
 /*=====[Prototypes (declarations) of public functions]=======================*/
 

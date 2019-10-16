@@ -81,7 +81,7 @@ void uartUsbReceiveCallback( void *unused )
 
 	        	 indicerx=0;
 	        	 // Recibimos el primer elemento por UART
-	        	 bufferin[indicerx] = uartRxRead(UART_USB);
+	        	 memDinIn[indicerx] = uartRxRead(UART_USB);
 	        	 //uartTxWrite(UART_USB, bufferin[indicerx] );
 	             xTimerStartFromISR( TimerTimeout , &xHigherPriorityTaskWoken );
 	             fsmUARTRXState = Recibiendo;
@@ -97,7 +97,7 @@ void uartUsbReceiveCallback( void *unused )
 	        	 {
 	        		 xTimerResetFromISR( TimerTimeout , &xHigherPriorityTaskWoken );
 	        		 indicerx++;
-	        		 bufferin[indicerx] = uartRxRead(UART_USB);
+	        		 memDinIn[indicerx] = uartRxRead(UART_USB);
 	        		 //uartTxWrite(UART_USB, bufferin[indicerx] );
 	        	 }
 	         break;

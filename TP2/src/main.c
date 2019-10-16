@@ -85,7 +85,7 @@ int main(void)
 		 }
 	   }
 
-	   xQueueRecibe = xQueueCreate( 100,  sizeof( char ) );
+	  xQueueRecibe = xQueueCreate( 100,  sizeof( char ) );
 
 	   // Error en la creacion de la Queue
 	   if( xQueueRecibe == NULL )
@@ -105,8 +105,8 @@ int main(void)
    // Create a task in freeRTOS with dynamic memory
 
    xTaskCreate(
-	  Driver,                  // Funcion de la tarea a ejecutar
-      (const char *)"Driver",    // Nombre de la tarea como String amigable para el usuario
+	  Driver,                     // Funcion de la tarea a ejecutar
+      (const char *)"Driver",     // Nombre de la tarea como String amigable para el usuario
       configMINIMAL_STACK_SIZE*2, // Cantidad de stack de la tarea
       0,                          // Parametros de tarea
       tskIDLE_PRIORITY+1,         // Prioridad de la tarea

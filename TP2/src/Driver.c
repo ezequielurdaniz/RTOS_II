@@ -30,6 +30,7 @@
 #include "stdio.h"
 #include "ctype.h"
 #include "string.h"
+#include "OA.h"
 
 /*=====[Definition macros of private constants]==============================*/
 
@@ -90,14 +91,12 @@ void Driver( void* pvParameters )
 
 	char caracter_in;
 	int TamCola;
-	int ComandoOA;
+	char ComandoOA;
 
 	uint8_t crc_temp_rx;
 	uint8_t crc_temp_tx;
 
 	char caracter_out;
-
-	struct node *temp;
 
     /* loop infinito de la tarea */
     for( ;; ) {
@@ -137,9 +136,29 @@ void Driver( void* pvParameters )
    		   // Si el paquete esta ok, tiene todas letras, lo convierte a mayusculas y lo envia por la queue
    		   // sino devuelve error por la queue
    		   if(EstadoPaquete == true ){
+
+   			  if(ComandoOA==1){
+
+   				 // Crea Objeto activo
+   				 ActiveObject_Init(ComandoOA);
+
+   				 for(int i = 0 ; i < indice+1 ; i++){
+   				    caracter_out = front->datos[i];
+   				    xStatusTX = xQueueSend( xQueueOA, &caracter_out, 0 ); // envio datos por Queue
+   				 }
+
+   			  }
+
+   			  if(ComandoOA==2){
+
+
+   			  }
+
+
+
    			    lValueToSend = MinusToMayus(front->datos); // Se envia el mensaje convertido
 
-   				// calcula el CRC8 de salida y lo suma al string
+   			   	// calcula el CRC8 de salida y lo suma al string
    				// Al dato recibido, se le agrega el crc8 y se reenvia por uart
    				lValueToSend = CalculaCRC8(lValueToSend);
 
@@ -209,18 +228,18 @@ void uartDriverInit(uartMap_t uart) {
 int TamanioCola(){
 
 	struct node *temporal;   // estructura temporal para el calculo del tamanio de la cola
-	int cnt;             // Variabe que contiene el tamaño de la cola
+	int cnt;                 // Variabe que contiene el tamaño de la cola
 
-		 // Verificar el tamaño de la cola que no sea mas grande que el maximo permitido : ELEMENTOS_MEMORIA
-		 temporal = front; // guarda el primer elemento de la cola en un temporal
+	     // Verificar el tamaño de la cola que no sea mas grande que el maximo permitido : ELEMENTOS_MEMORIA
+		temporal = front; // guarda el primer elemento de la cola en un temporal
 
-		 cnt = 0;  // inicializa la variable para el recorrido
+		cnt = 0;  // inicializa la variable para el recorrido
 
-		 // va recorriendo toda la cola desde el primer elemento
-		 while (temporal){
+		// va recorriendo toda la cola desde el primer elemento
+		while (temporal){
 			temporal = temporal->link;
 			cnt++;
-		 }
+		}
 
 	return cnt;   // devuelve la cantidad de elementos presentes en la cola dinamica
 

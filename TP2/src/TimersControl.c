@@ -43,7 +43,7 @@
 
 /*=====[Definitions of private global variables]=============================*/
 
-char bufferin[100];  // Variable de recepcion de datos por puerto UART       // <-- File object needed for each open file
+char memDinIn[MEMORIADINAMICA];  // Variable de recepcion de datos por puerto UART       // <-- File object needed for each open file
 
 /*=====[Prototypes (declarations) of private functions]======================*/
 
@@ -128,11 +128,11 @@ void TimeoutCallback(TimerHandle_t xTimer){
      }
 
      // Guardo en indice la cantidad de datos que recibi por el puerto serie
-     indice = strlen(bufferin);
+     indice = strlen(memDinIn);
 
      // Verifica que el nuevo paquete contiene los delimitadores y el elemento de control
      // sino devuelve un error por UART
-     if(bufferin[0]=='[' && (bufferin[1]=='1' || bufferin[1]=='2') && bufferin[indice-1]==']'){
+     if(memDinIn[0]=='[' && (memDinIn[1]=='1' || memDinIn[1]=='2') && memDinIn[indice-1]==']'){
         // OK!
     	// gpioToggle(LED3);
      }
@@ -154,8 +154,8 @@ void TimeoutCallback(TimerHandle_t xTimer){
 	 temp = (struct node*)pvPortMalloc(sizeof(struct node));
 	 // Copia el contenido del buffer entrante de datos en el dato que ira al frente, quita los [ ]
 	 // en la proxima etapa leera los comandos 1 y 2 del objeto activo
-	 for(int i = 0 ; i < strlen(bufferin) - 1; i++){
-		 temp->datos[i] = bufferin[i+1]; // copia el contenido del buffer entrante en ultimo elemento de la cola dinamica
+	 for(int i = 0 ; i < strlen(memDinIn) - 1; i++){
+		 temp->datos[i] = memDinIn[i+1]; // copia el contenido del buffer entrante en ultimo elemento de la cola dinamica
 	 }
 
 	 BorrarBufferIn();
@@ -245,7 +245,7 @@ bool_t VerificaColaLlena(){
  */
 
 void BorrarBufferIn(){
-	memset(&bufferin[0], 0, sizeof(bufferin));
+	memset(&memDinIn[0], 0, sizeof(memDinIn));
 }
 
 /*!
