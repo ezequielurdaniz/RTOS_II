@@ -63,6 +63,74 @@
 /*=====[Implementations of public functions]=================================*/
 
 /*!
+ * @brief  Espera que llegue un paquete a la cola
+ *
+ * @param[in] void
+ *
+ * @return  void
+ */
+
+void esperar_paquete(){
+
+	int TamCola;
+
+	TamCola=TamanioCola();
+
+	 // Lee la cantidad de datos que hay en la cola dinamica de datos, para procesarlos o quedarse aqui
+	 while(TamCola==0){
+	    TamCola=TamanioCola();
+	 }
+
+	 // Probar si funciona con
+	 //while(front->datos == NULL);
+
+}
+
+/*!
+ * @brief  Obtiene el Comando de la cola dinamica
+ *
+ * @param[in] void
+ *
+ * @return  char
+ */
+
+char ObtenerComando(){
+
+	// Variable local para proceso del comando
+	char ComandoOA;
+
+	// El primer elemento de la cola dinamica es el comando
+	ComandoOA=front->datos[0];
+
+    // Acomoda los datos para seleccionar solo los mismos y pisar el comando en la cola de memoria dinamica
+    for(int i = 0 ; i < strlen(front->datos); i++){
+        front->datos[i] = front->datos[i+1];
+    }
+
+    // devuelve el comando OA
+	return ComandoOA;
+}
+
+/*!
+ * @brief  Obtiene la cantidad de elementos en array de memoria dinamica
+ *
+ * @param[in] void
+ *
+ * @return  char
+ */
+
+uint8_t ObtenerCantidadCaracteres(){
+
+	// Guardo en indice la cantidad de datos que recibi por el puerto serie
+      uint8_t indice;
+
+      indice = strlen(front->datos);
+      indice--; // acomodo el indice
+
+      return indice;
+}
+
+/*!
  * @brief  Tarea principal del Driver
  *
  * @param[in] pvParameters
@@ -90,7 +158,7 @@ void Driver( void* pvParameters )
 	char Error[] = "ERROR "; // Mensaje de error para el envio por la queue
 
 	char caracter_in;
-	int TamCola;
+
 	char ComandoOA;
 
 	uint8_t crc_temp_rx;
@@ -98,28 +166,23 @@ void Driver( void* pvParameters )
 
 	char caracter_out;
 
+	void *paquete;
+
     /* loop infinito de la tarea */
     for( ;; ) {
 
-       TamCola=TamanioCola();
-
-       // Lee la cantidad de datos que hay en la cola dinamica de datos, para procesarlos o quedarse aqui
-       while(TamCola==0){
-    	  TamCola=TamanioCola();
-       }
+       // Espera que se agregue un paquete en la cola dinamimca de memoria
+       esperar_paquete();
 
        // guarda en la variable que comando llego para realizar la aplicacion de la OA
-       ComandoOA=front->datos[0];
-
-       // Acomoda los datos para seleccionar solo los mismos
-       for(int i = 0 ; i < strlen(front->datos); i++){
-    	     front->datos[i] = front->datos[i+1];
-       }
+       ComandoOA=ObtenerComando();
+       // Operacion mayusculizar : MinusToMayus
+       // Operacion minusculizar : MayustoMinus
 
        // Guardo en indice la cantidad de datos que recibi por el puerto serie
-       indice = strlen(front->datos);
-       indice--; // acomodo el indice
+       indice=ObtenerCantidadCaracteres();
 
+       // Calcular CRC
        // realizo el calculo del CRC para verificar el dato entrante
        crc_temp_rx = crc8_calc(0 , front->datos , indice-1);
 
@@ -137,6 +200,7 @@ void Driver( void* pvParameters )
    		   // sino devuelve error por la queue
    		   if(EstadoPaquete == true ){
 
+   			  // Mayusculizar
    			  if(ComandoOA==1){
 
    				 // Crea Objeto activo
@@ -149,12 +213,11 @@ void Driver( void* pvParameters )
 
    			  }
 
+              // Minusculizar
    			  if(ComandoOA==2){
 
 
    			  }
-
-
 
    			    lValueToSend = MinusToMayus(front->datos); // Se envia el mensaje convertido
 

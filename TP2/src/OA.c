@@ -28,12 +28,11 @@
 
 /*================[declaración de funciones internas]========================*/
 
-static char ReturnCommand( char* str);		/* Obtiene comando */
-static Packagereceive( void* ptr );			/* Espera el suceso de un evento */
 
 /*====================[definición de datos internos]=========================*/
 
 // Inicializacion de variables para verificacion de OA activos
+
 bool_t CorriendoMayus=false;
 bool_t CorriendoMinus=false;
 
@@ -46,7 +45,10 @@ bool_t CorriendoMinus=false;
 void ActiveObject_Init( Active_Object_t* obj ) {
 
 	if(obj->TipoOperacion==1){
+
 		if(obj->CorriendoMinus==false){
+
+		}
     /* Crear tarea en freeRTOS */
 	xTaskCreate(
 	   ActiveObject_App,					/* Funcion de la tarea a ejecutar (en OA.h) */
@@ -65,7 +67,14 @@ void ActiveObject_Init( Active_Object_t* obj ) {
 	}
 
 	/* Inicializo elementos de la estructura */
-	obj->xQueue = xQueueCreate( MEMORIADINAMICA, sizeof( char ) );		/* Creo cola */
+	xQueueOA= xQueueCreate( MEMORIADINAMICA,  sizeof( char ) );	/* Creo cola */
+
+	// Error en la creacion de la Queue
+	if( xQueueOA == NULL )
+	{   /* Error fatal */
+	    gpioWrite(LEDR, ON);   // Indica una falla en el sistema
+	}
+
 }
 
 void ActiveObject_App( void* param  ) { 	/* Active Object application */
@@ -95,24 +104,3 @@ void ActiveObject_App( void* param  ) { 	/* Active Object application */
 /*==================[internal functions definition]==========================*/
 
 
-
-/* Función que lee el carácter de comando y lo devuelve */
-static char ReturnCommand( char* str) {
-
-	if( str[1] == ( 'U' || 'u' ) ) {		/* Convertir a mayúsculas */
-		return 'U';
-	}
-
-	if( str[1] == ( 'L' || 'l' ) ) {		/* Convertir a minúsculas */
-		return 'L';
-	}
-	else {
-		return'E';							/* ERROR */
-	}
-}
-
-static PackageReceive( Active_Object_t* obj, char  ) {
-
-	xQueueReceive( obj -> xQueue, ( void * ) buffer_IN ,portMAX_DELAY );
-
-}

@@ -36,9 +36,12 @@
 
 /*=====[Definitions of public global variables]==============================*/
 
+
 /*=====[Definitions of private global variables]=============================*/
 
+
 /*=====[Main function, program entry point after power on or reset]==========*/
+
 
 /*!
  * @brief  Funcion main
@@ -83,6 +86,7 @@ int main(void)
 	     while(1){
 	    	 gpioWrite(LEDR, ON);  // Indica una falla en el sistema
 		 }
+
 	   }
 
 	  xQueueRecibe = xQueueCreate( 100,  sizeof( char ) );
