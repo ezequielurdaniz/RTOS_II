@@ -44,6 +44,7 @@ extern "C" {
 
 /*=====[Definitions of public data types]====================================*/
 
+
 typedef enum{
    StandBy,
    Recibiendo,

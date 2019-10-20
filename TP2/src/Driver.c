@@ -34,18 +34,6 @@
 
 /*=====[Definition macros of private constants]==============================*/
 
-#define UART_PC        UART_USB
-#define UART_232       UART_232
-
-#define TIMEOUT_VALIDATION 50 // 50 ms de timeout
-
-#define LED_ROJO      LED2
-#define LED_AMARILLO  LED1
-#define LED_VERDE     LED3
-
-#define MEMORIADINAMICA 75
-
-#define ELEMENTOS_MEMORIA 4
 
 /*=====[Private function-like macros]========================================*/
 
@@ -72,7 +60,7 @@
 
 void esperar_paquete(){
 
-	int TamCola;
+	int TamCola=0;
 
 	TamCola=TamanioCola();
 
@@ -94,10 +82,10 @@ void esperar_paquete(){
  * @return  char
  */
 
-char ObtenerComando(){
+int ObtenerComando(){
 
 	// Variable local para proceso del comando
-	char ComandoOA;
+	int ComandoOA;
 
 	// El primer elemento de la cola dinamica es el comando
 	ComandoOA=front->datos[0];
@@ -157,25 +145,34 @@ void Driver( void* pvParameters )
 
 	char Error[] = "ERROR "; // Mensaje de error para el envio por la queue
 
-	char caracter_in;
-
 	char ComandoOA;
 
 	uint8_t crc_temp_rx;
-	uint8_t crc_temp_tx;
 
 	char caracter_out;
 
-	void *paquete;
+	int TamCola=0;
+
+	Active_Object_t *instancia_generic;
+	Active_Object_t *instancia1 = NULL;    // para mayusculizar
+	Active_Object_t *instancia2 = NULL;    // para minusculizar
 
     /* loop infinito de la tarea */
-    for( ;; ) {
+    for( ;; ){
 
        // Espera que se agregue un paquete en la cola dinamimca de memoria
-       esperar_paquete();
+
+    	 TamCola=TamanioCola();
+
+    		 // Lee la cantidad de datos que hay en la cola dinamica de datos, para procesarlos o quedarse aqui
+    	  while(TamCola==0){
+    		    TamCola=TamanioCola();
+    		    vTaskDelay(1000);
+    	 }
 
        // guarda en la variable que comando llego para realizar la aplicacion de la OA
        ComandoOA=ObtenerComando();
+
        // Operacion mayusculizar : MinusToMayus
        // Operacion minusculizar : MayustoMinus
 
@@ -196,30 +193,41 @@ void Driver( void* pvParameters )
    		   // Chequea el paquete entrante para verificar si son letras
    		   EstadoPaquete = CheckLettersFnc(front->datos);
 
+   		   // Aca deberia copiar el puntero de la memoria dinamica a una cola para ser procesada
+   		   // por la OA
+
    		   // Si el paquete esta ok, tiene todas letras, lo convierte a mayusculas y lo envia por la queue
    		   // sino devuelve error por la queue
    		   if(EstadoPaquete == true ){
 
    			  // Mayusculizar
-   			  if(ComandoOA==1){
+   			  //if(ComandoOA==1){
 
-   				 // Crea Objeto activo
-   				 ActiveObject_Init(ComandoOA);
+   				  // Verifica que la instancia 1 es NULL para poder crear una nueva
+   				  //if(instancia1 == NULL){
+   					 uartWriteByte(UART_USB, '1' );
+   					// Indico que comando sera para la creacion del objeto activo
+   					instancia1->ComandoOA=ComandoOA;
+   					instancia1->datos=front->datos;
+   					// Crea Objeto activo
+   					uartWriteByte(UART_USB, '7' );
+   					ActiveObject_Init(instancia1);
+   				  //}
 
-   				 for(int i = 0 ; i < indice+1 ; i++){
-   				    caracter_out = front->datos[i];
-   				    xStatusTX = xQueueSend( xQueueOA, &caracter_out, 0 ); // envio datos por Queue
-   				 }
+   				  // Si el objeto activo para la operacion mayusculizar esta creado
+   				  // lo agrego a la cola de espera
+   				  //instancia_generic = instancia1;
+   			   // }
 
-   			  }
+   			    //ao_process( instancia_generic  , &ptr);
 
-              // Minusculizar
-   			  if(ComandoOA==2){
+   			    uartWriteByte(UART_USB, '2' );
+   			    vTaskDelay(2000);
+   			    uartWriteByte(UART_USB, '3' );
 
+   			    xQueueReceive(instancia1->xQueueOA, &lValueToSend, 0);
 
-   			  }
-
-   			    lValueToSend = MinusToMayus(front->datos); // Se envia el mensaje convertido
+   			    //lValueToSend = MinusToMayus(front->datos); // Se envia el mensaje convertido
 
    			   	// calcula el CRC8 de salida y lo suma al string
    				// Al dato recibido, se le agrega el crc8 y se reenvia por uart

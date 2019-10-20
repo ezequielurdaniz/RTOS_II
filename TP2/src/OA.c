@@ -31,11 +31,6 @@
 
 /*====================[definición de datos internos]=========================*/
 
-// Inicializacion de variables para verificacion de OA activos
-
-bool_t CorriendoMayus=false;
-bool_t CorriendoMinus=false;
-
 /*==================[definiciones y macros]==================================*/
 
 /*==================[declaraciones de funciones externas]====================*/
@@ -44,62 +39,70 @@ bool_t CorriendoMinus=false;
 
 void ActiveObject_Init( Active_Object_t* obj ) {
 
-	if(obj->TipoOperacion==1){
+	BaseType_t xReturned;
 
-		if(obj->CorriendoMinus==false){
+	// Si se solicita crear un objeto activo para mayusculizar
+	if(obj->ComandoOA==1){
 
-		}
-    /* Crear tarea en freeRTOS */
-	xTaskCreate(
-	   ActiveObject_App,					/* Funcion de la tarea a ejecutar (en OA.h) */
-       (const char *)"AO_application",    	/* Nombre de la tarea como String amigable para el usuario */
-       configMINIMAL_STACK_SIZE*2,      	/* Cantidad de stack de la tarea */
-       obj,                               	/* El parametro define la función UPPER o LOWER */
-       tskIDLE_PRIORITY+1,              	/* Prioridad de la tarea */
-       &xHandle		                		/* Puntero a la tarea creada en el sistema */
-    );
-	   // Si la tarea se creo correctamente
-	   if(xHandle!=NULL){
-		   CorriendoMinus=true;
-	   }
+	  /* Crear tarea en freeRTOS */
+	  xReturned = xTaskCreate(
+		  AO_Mayus,
+	      (const char *)"AO_Mayusculizar",
+	      configMINIMAL_STACK_SIZE*2,
+	      obj,
+	      tskIDLE_PRIORITY+1,
+	      &obj->xHandleOA
+	      );
 
+		  // Si la tarea se creo correctamente
+		  if(obj->xHandleOA!=NULL){
 
+		  }
+
+		  /* Inicializo elementos de la estructura */
+		  obj->xQueueOA = xQueueCreate( 1, sizeof( char * ));	/* Creo cola */
+
+		  // Error en la creacion de la Queue
+		  if( obj->xQueueOA == NULL ){
+		  	 /* Error fatal */
+		  	 // Indica una falla en el sistema
+		  }
 	}
-
-	/* Inicializo elementos de la estructura */
-	xQueueOA= xQueueCreate( MEMORIADINAMICA,  sizeof( char ) );	/* Creo cola */
-
-	// Error en la creacion de la Queue
-	if( xQueueOA == NULL )
-	{   /* Error fatal */
-	    gpioWrite(LEDR, ON);   // Indica una falla en el sistema
-	}
+	// Si se solicita crear un objeto activo para minusculizar
 
 }
 
-void ActiveObject_App( void* param  ) { 	/* Active Object application */
+
+
+
+/*
+ *
+ *  Task para mayusculizar
+ *
+ */
+
+void AO_Mayus( void* param  ) { 	                        /* Active Object application */
 
 	Active_Object_t* obj = ( Active_Object_t* ) param;		/* Casting */
 
 	while(1) {
 
+		 for (int i = 0; obj->datos[i] != '\0'; i++){
+		      obj->datos[i] = toupper((char)(obj->datos[i]));
+		  }
+
+		  // envia la respuesta
+		  xQueueSend(obj->xQueueOA, &obj->datos, 0);
 
 
-         if(xQueueReceive(obj->xQueue, obj->buffer_IN ,0 ) == pdTRUE){
-             //
-         }
-         else
-         {
-
-
-        	 // llamar a destructor del obj
-			 CorriendoMinus=false;
-			 vTaskDelete(NULL);
-         }
-
+          // llamar a destructor del obj
+          vTaskDelete(obj->xHandleOA);
 
 	}
+
 }
+
+
 
 /*==================[internal functions definition]==========================*/
 

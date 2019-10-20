@@ -29,18 +29,20 @@
 /*==================[definiciones y macros]==================================*/
 
 /* Active Object's attributes... */
+
 typedef struct {
-	char * buffer_IN;                    /* Buffer de entrada */
-	uint8_t tamanio;					 /* Tamanio del buffer de entrada */
-	uint8_t TipoOperacion;
-	QueueHandle_t xQueueOA;				 /* Handler de la cola */
-	TaskHandle_t xHandleOA;				 /* Handler de la tarea */
+	QueueHandle_t xQueueOA;				 // Handler de la cola
+	TaskHandle_t xHandleOA;				 // Handler de la tarea
+	uint8_t ComandoOA;					 // Comando para la creacion del objeto activo
+	char datos;
 } Active_Object_t;
 
 /* Active_Object's operations (Active_Object's interface)... */
 
 void ActiveObject_Init( Active_Object_t* obj );					/* Initialization */
-void ActiveObject_App( void );									/* Active Object application */
-void ActiveObject_Task( void* param);							/* Active Object task function */
+void AO_Mayus( void* param  );
+
+/* Declaracion de las Queue*/
+QueueHandle_t xQueueOA;
 
 #endif /* RTOSII_RTOS_II_TP2_INC_OA_H_ */

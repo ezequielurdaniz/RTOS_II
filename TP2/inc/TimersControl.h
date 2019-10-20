@@ -36,13 +36,10 @@ extern "C" {
 
 /*=====[Definition macros of public constants]===============================*/
 
-#define TIMEOUT_VALIDATION 100 // 100 ms de timeout
-
 #define LED_ROJO      LED2
 #define LED_AMARILLO  LED1
 #define LED_VERDE     LED3
 
-#define MEMORIADINAMICA 25
 #define ELEMENTOS_MEMORIA 4
 
 /*=====[Public function-like macros]=========================================*/
