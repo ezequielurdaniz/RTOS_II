@@ -132,8 +132,6 @@ RTOSII/RTOS_II/TP2/out/RTOSII/RTOS_II/TP2/src/Driver.o: \
  RTOSII/RTOS_II/TP2/inc/crc8.h RTOSII/RTOS_II/TP2/inc/TimersControl.h \
  RTOSII/RTOS_II/TP2/inc/Driver.h libs/freertos/include/timers.h \
  libs/freertos/include/task.h libs/freertos/include/queue.h \
- RTOSII/RTOS_II/TP2/inc/ProcessLetters.h \
- RTOSII/RTOS_II/TP2/inc/Callbacks.h RTOSII/RTOS_II/TP2/inc/crc8.h \
- RTOSII/RTOS_II/TP2/inc/TimersControl.h \
+ RTOSII/RTOS_II/TP2/inc/Callbacks.h \
  RTOSII/RTOS_II/TP2/inc/ProcessLetters.h RTOSII/RTOS_II/TP2/inc/OA.h \
- libs/freertos/include/semphr.h libs/freertos/include/queue.h
+ RTOSII/RTOS_II/TP2/inc/TimersControl.h RTOSII/RTOS_II/TP2/inc/OA.h

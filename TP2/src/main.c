@@ -111,11 +111,22 @@ int main(void)
    xTaskCreate(
 	  Driver,                     // Funcion de la tarea a ejecutar
       (const char *)"Driver",     // Nombre de la tarea como String amigable para el usuario
-      configMINIMAL_STACK_SIZE*2, // Cantidad de stack de la tarea
+      configMINIMAL_STACK_SIZE*5, // Cantidad de stack de la tarea
       0,                          // Parametros de tarea
       tskIDLE_PRIORITY+1,         // Prioridad de la tarea
       0                           // Puntero a la tarea creada en el sistema
    );
+
+   // Create a task in freeRTOS with dynamic memory
+
+    xTaskCreate(
+     Demonio,                      // Funcion de la tarea a ejecutar
+       (const char *)"Demonio",    // Nombre de la tarea como String amigable para el usuario
+       configMINIMAL_STACK_SIZE*5, // Cantidad de stack de la tarea
+       0,                          // Parametros de tarea
+       tskIDLE_PRIORITY+1,         // Prioridad de la tarea
+       0                           // Puntero a la tarea creada en el sistema
+    );
 
    /*
     *  Inicializacion del scheduler

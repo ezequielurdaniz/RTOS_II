@@ -22,9 +22,7 @@
 #include "FreeRTOSConfig.h"
 #include "task.h"
 #include "sapi.h"
-#include "crc8.h"
 #include "TimersControl.h"
-#include "ProcessLetters.h"
 #include "timers.h"
 #include "queue.h"
 #include "stdio.h"
@@ -82,10 +80,10 @@ void esperar_paquete(){
  * @return  char
  */
 
-int ObtenerComando(){
+uint8_t ObtenerComando(){
 
 	// Variable local para proceso del comando
-	int ComandoOA;
+	uint8_t ComandoOA;
 
 	// El primer elemento de la cola dinamica es el comando
 	ComandoOA=front->datos[0];
@@ -119,6 +117,88 @@ uint8_t ObtenerCantidadCaracteres(){
 }
 
 /*!
+ * @brief  Obtiene la cantidad de elementos en array de memoria dinamica
+ *
+ * @param[in] void
+ *
+ * @return  void
+ */
+
+void CreaElementoColaInstancias(){
+/*
+    struct Instancias *tempInst;
+
+	// Creo el bloque de memoria dinamica
+	tempInst = (struct Instancias*)pvPortMalloc(sizeof(struct Instancias));
+
+	 // el bloque creado, sera el ultimo de la cola, entonces apuntara a NULL
+	tempInst->linkInst = NULL;
+
+	// Si el primer elemento es NULL, significa que la cola esta vacia, entonces el elemento que creo
+	// sera el primero y el ultimo (FRONT & REAR)
+	// en caso que no sea el primero, lo acomodará al final de la cola dinamica de memoria
+
+	if(frontInst == NULL){
+		frontInst = rearInst = tempInst;
+	}
+	else
+    {
+		rearInst->linkInst = tempInst;
+		rearInst = tempInst;
+	}
+*/
+}
+
+/*!
+ * @brief  Tarea Demonio del Driver
+ *
+ * @param[in] pvParameters
+ *
+ * @return  void
+ */
+
+void Demonio( void* pvParameters )
+{
+
+  char* lValueToSend1;	 // el valor a enviar por la cola
+  char* lValueToSend2;
+
+  while(1){
+
+	 if( Instancia1.xQueueOA != 0 )
+	 {
+		 if(xQueueReceive(Instancia1.xQueueOA, &lValueToSend1, 0)){
+
+			 // calcula el CRC8 de salida y lo suma al string
+			 // Al dato recibido, se le agrega el crc8 y se reenvia por uart
+			 lValueToSend1 = CalculaCRC8(lValueToSend1);
+
+			 EnvioMensajeUART(lValueToSend1, strlen(lValueToSend1));
+
+			 memset(&lValueToSend1[0], 0, sizeof(lValueToSend1));                      // clear the array
+			 Instancia1.xQueueOA=0;
+	     }
+	 }
+
+	 if( Instancia2.xQueueOA != 0 )
+	 {
+	 	if(xQueueReceive(Instancia2.xQueueOA, &lValueToSend2, 0)){
+
+	 		// calcula el CRC8 de salida y lo suma al string
+	 		// Al dato recibido, se le agrega el crc8 y se reenvia por uart
+	 		lValueToSend2 = CalculaCRC8(lValueToSend2);
+
+	 		EnvioMensajeUART(lValueToSend2, strlen(lValueToSend2));
+
+	 		memset(&lValueToSend2[0], 0, sizeof(lValueToSend2));                      // clear the array
+	 		Instancia2.xQueueOA=0;
+	 	 }
+	  }
+  }
+
+}
+
+/*!
  * @brief  Tarea principal del Driver
  *
  * @param[in] pvParameters
@@ -128,11 +208,8 @@ uint8_t ObtenerCantidadCaracteres(){
 
 void Driver( void* pvParameters )
 {
-
-	DEBUG_PRINT_ENABLE;  //Para configurar los mensajes por monitor
-
 	/* Configuracion inicial de la tarea */
-	char* lValueToSend;	 // el valor a enviar por la cola
+
 	char lReceivedValue[MEMORIADINAMICA];
 
 	uint8_t indice = 0;
@@ -145,7 +222,7 @@ void Driver( void* pvParameters )
 
 	char Error[] = "ERROR "; // Mensaje de error para el envio por la queue
 
-	char ComandoOA;
+	uint8_t ComandoDin;
 
 	uint8_t crc_temp_rx;
 
@@ -153,28 +230,21 @@ void Driver( void* pvParameters )
 
 	int TamCola=0;
 
-	Active_Object_t *instancia_generic;
-	Active_Object_t *instancia1 = NULL;    // para mayusculizar
-	Active_Object_t *instancia2 = NULL;    // para minusculizar
+	bool_t resMayus;
+	bool_t resMinus;
 
-    /* loop infinito de la tarea */
     for( ;; ){
 
        // Espera que se agregue un paquete en la cola dinamimca de memoria
+       while(front==NULL);
 
-    	 TamCola=TamanioCola();
+       // El primer elemento de la cola dinamica es el comando
+       ComandoDin=front->datos[0];
 
-    		 // Lee la cantidad de datos que hay en la cola dinamica de datos, para procesarlos o quedarse aqui
-    	  while(TamCola==0){
-    		    TamCola=TamanioCola();
-    		    vTaskDelay(1000);
-    	 }
-
-       // guarda en la variable que comando llego para realizar la aplicacion de la OA
-       ComandoOA=ObtenerComando();
-
-       // Operacion mayusculizar : MinusToMayus
-       // Operacion minusculizar : MayustoMinus
+       // Acomoda los datos para seleccionar solo los mismos y pisar el comando en la cola de memoria dinamica
+       for(int i = 0 ; i < strlen(front->datos); i++){
+           front->datos[i] = front->datos[i+1];
+       }
 
        // Guardo en indice la cantidad de datos que recibi por el puerto serie
        indice=ObtenerCantidadCaracteres();
@@ -195,48 +265,49 @@ void Driver( void* pvParameters )
 
    		   // Aca deberia copiar el puntero de la memoria dinamica a una cola para ser procesada
    		   // por la OA
-
    		   // Si el paquete esta ok, tiene todas letras, lo convierte a mayusculas y lo envia por la queue
    		   // sino devuelve error por la queue
+
    		   if(EstadoPaquete == true ){
 
-   			  // Mayusculizar
-   			  //if(ComandoOA==1){
+             // Comprueba si el comando es para mayusculizar
+             if(ComandoDin=='1'){
 
    				  // Verifica que la instancia 1 es NULL para poder crear una nueva
-   				  //if(instancia1 == NULL){
-   					 uartWriteByte(UART_USB, '1' );
-   					// Indico que comando sera para la creacion del objeto activo
-   					instancia1->ComandoOA=ComandoOA;
-   					instancia1->datos=front->datos;
-   					// Crea Objeto activo
-   					uartWriteByte(UART_USB, '7' );
-   					ActiveObject_Init(instancia1);
-   				  //}
+   				 Instancia1.ComandoOA=1;
+   				 Instancia1.datos = front->datos;
 
-   				  // Si el objeto activo para la operacion mayusculizar esta creado
-   				  // lo agrego a la cola de espera
-   				  //instancia_generic = instancia1;
-   			   // }
+   				 resMayus=ActiveObject_Init(&Instancia1);
 
-   			    //ao_process( instancia_generic  , &ptr);
+   				 if(resMayus==false){
+   					// guarda ese dato en la cola de instancias, en el caso que este ocupada esa tarea
+   					//CreaElementoColaInstancias();
+   			     }else if(resMayus==true){
 
-   			    uartWriteByte(UART_USB, '2' );
-   			    vTaskDelay(2000);
-   			    uartWriteByte(UART_USB, '3' );
 
-   			    xQueueReceive(instancia1->xQueueOA, &lValueToSend, 0);
+   			     }
 
-   			    //lValueToSend = MinusToMayus(front->datos); // Se envia el mensaje convertido
+   			  // Comprueba si el comando es para minusculizar
+              }else if(ComandoDin=='2'){
 
-   			   	// calcula el CRC8 de salida y lo suma al string
-   				// Al dato recibido, se le agrega el crc8 y se reenvia por uart
-   				lValueToSend = CalculaCRC8(lValueToSend);
+                 // Verifica que la instancia 1 es NULL para poder crear una nueva
+                 Instancia2.ComandoOA=2;
+                 Instancia2.datos = front->datos;
 
-   				EnvioMensajeUART(lValueToSend, indice);
+                 resMinus=ActiveObject_Init(&Instancia2);
 
-   				indice = 0;
-   				memset(&lValueToSend[0], 0, sizeof(lValueToSend));                      // clear the array
+                 if(resMinus==false){
+                	 // guarda ese dato en la cola de instancias, en el caso que este ocupada esa tarea
+
+                 }else if(resMinus==false){
+
+                 }
+              }
+
+		    	 tempInstMayus = front;
+		    	 front = front->link;
+
+
 
    		   }
    		   else

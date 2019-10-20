@@ -22,13 +22,13 @@
 #include "sapi.h"
 #include "crc8.h"
 #include "TimersControl.h"
-#include "ProcessLetters.h"
 #include "Callbacks.h"
 #include "timers.h"
 #include "queue.h"
 #include "stdio.h"
 #include "ctype.h"
 #include "string.h"
+#include "OA.h"
 
 /*=====[C++ - begin]=========================================================*/
 
@@ -61,6 +61,9 @@ struct node
 }*front, *rear;
 
 
+struct node *tempInstMayus;
+struct node *tempInstMinus;
+
 /*=====[Definitions of public data types]====================================*/
 
 
@@ -74,9 +77,13 @@ char memDinIn[MEMORIADINAMICA];  // Variable de recepcion de datos por puerto UA
 
 
 void Driver( void* pvParameters );
+void Demonio( void* pvParameters );
 void uartDriverInit(uartMap_t uart);
 int TamanioCola();
 void EnvioMensajeUART(char * str, int indice);
+uint8_t ObtenerComando();
+uint8_t ObtenerCantidadCaracteres();
+void CreaElementoColaInstancias();
 
 /*=====[Prototypes (declarations) of public interrupt functions]=============*/
 

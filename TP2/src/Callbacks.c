@@ -131,11 +131,16 @@ void uartUsbSendCallback( void *unused )
 	 if(xQueueReceiveFromISR( xQueueRecibe, &caracter_in, &xTaskWokenByReceive ) == pdTRUE){
 		 xTimerResetFromISR( TimeToExit , &xHigherPriorityTaskWoken );
 		 //gpioToggle(LED1);
-		 /* Se recibe un caracter y se almacena */
+		 /* Se recibe un caracter y se almacena, si es el primer caracter, antepone el [ */
 		 lReceivedValue[indice] = caracter_in;
 
 		  if(lReceivedValue[indice] != '\0'){
 		     /* Final del mensaje */
+
+			 if(indice==0){
+			 	uartWriteByte(UART_USB, '[' );
+			 }
+
 			 uartWriteByte(UART_USB, caracter_in );
 			 indice++;
 		  }
@@ -143,6 +148,7 @@ void uartUsbSendCallback( void *unused )
 		  {
 			 indice = 0;
 			 memset(&lReceivedValue[0], 0, sizeof(lReceivedValue)); // clear the array
+			 uartWriteByte(UART_USB, ']' );
 			 uartWriteByte(UART_USB, '\r' );
 			 uartWriteByte(UART_USB, '\n' );
 			 uartCallbackClr( UART_USB, UART_TRANSMITER_FREE);

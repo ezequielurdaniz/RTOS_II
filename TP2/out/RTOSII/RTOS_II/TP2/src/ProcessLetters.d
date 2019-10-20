@@ -132,5 +132,6 @@ RTOSII/RTOS_II/TP2/out/RTOSII/RTOS_II/TP2/src/ProcessLetters.o: \
  libs/sapi/sapi_v0.5.2/external_peripherals/ultrasonic/hcsr04/inc/sapi_ultrasonic_hcsr04.h \
  RTOSII/RTOS_II/TP2/inc/crc8.h RTOSII/RTOS_II/TP2/inc/TimersControl.h \
  libs/freertos/include/timers.h libs/freertos/include/task.h \
- libs/freertos/include/queue.h RTOSII/RTOS_II/TP2/inc/ProcessLetters.h \
- RTOSII/RTOS_II/TP2/inc/Callbacks.h RTOSII/RTOS_II/TP2/inc/Driver.h
+ libs/freertos/include/queue.h RTOSII/RTOS_II/TP2/inc/Callbacks.h \
+ RTOSII/RTOS_II/TP2/inc/ProcessLetters.h RTOSII/RTOS_II/TP2/inc/OA.h \
+ RTOSII/RTOS_II/TP2/inc/Driver.h

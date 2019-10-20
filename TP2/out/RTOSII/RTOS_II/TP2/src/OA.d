@@ -130,7 +130,7 @@ RTOSII/RTOS_II/TP2/out/RTOSII/RTOS_II/TP2/src/OA.o: \
  libs/sapi/sapi_v0.5.2/external_peripherals/memory/eeprom/inc/sapi_eeprom24xx1025.h \
  libs/sapi/sapi_v0.5.2/external_peripherals/ultrasonic/hcsr04/inc/sapi_ultrasonic_hcsr04.h \
  RTOSII/RTOS_II/TP2/inc/OA.h RTOSII/RTOS_II/TP2/inc/FreeRTOSConfig.h \
- RTOSII/RTOS_II/TP2/inc/crc8.h RTOSII/RTOS_II/TP2/inc/Driver.h \
- RTOSII/RTOS_II/TP2/inc/TimersControl.h libs/freertos/include/timers.h \
- libs/freertos/include/task.h RTOSII/RTOS_II/TP2/inc/ProcessLetters.h \
- RTOSII/RTOS_II/TP2/inc/Callbacks.h
+ RTOSII/RTOS_II/TP2/inc/Callbacks.h RTOSII/RTOS_II/TP2/inc/crc8.h \
+ RTOSII/RTOS_II/TP2/inc/Driver.h RTOSII/RTOS_II/TP2/inc/TimersControl.h \
+ libs/freertos/include/timers.h libs/freertos/include/task.h \
+ RTOSII/RTOS_II/TP2/inc/OA.h RTOSII/RTOS_II/TP2/inc/ProcessLetters.h

@@ -8,8 +8,8 @@
  * ao.h
  *===========================================================================*/
 
-#ifndef RTOSII_RTOS_II_TP2_INC_OA_H_
-#define RTOSII_RTOS_II_TP2_INC_OA_H_
+#ifndef OA_H_
+#define OA_H_
 
 /*==================[inlcusiones]============================================*/
 
@@ -17,14 +17,9 @@
 #include "FreeRTOSConfig.h"
 #include "task.h"
 #include "sapi.h"
-#include "crc8.h"
-#include "Driver.h"
-#include "TimersControl.h"
 #include "Callbacks.h"
-#include "ProcessLetters.h"
 #include "timers.h"
 #include "queue.h"
-#include "semphr.h"		//Api de sincronización (sem y mutex)
 
 /*==================[definiciones y macros]==================================*/
 
@@ -33,16 +28,22 @@
 typedef struct {
 	QueueHandle_t xQueueOA;				 // Handler de la cola
 	TaskHandle_t xHandleOA;				 // Handler de la tarea
-	uint8_t ComandoOA;					 // Comando para la creacion del objeto activo
-	char datos;
+	int ComandoOA;					 // Comando para la creacion del objeto activo
+	char * datos;
 } Active_Object_t;
+
+Active_Object_t Instancia1;
+Active_Object_t Instancia2;
+
+
 
 /* Active_Object's operations (Active_Object's interface)... */
 
-void ActiveObject_Init( Active_Object_t* obj );					/* Initialization */
+bool_t ActiveObject_Init( Active_Object_t* Obj );				/* Initialization */
 void AO_Mayus( void* param  );
+void AO_Minus( void* param  );
 
 /* Declaracion de las Queue*/
-QueueHandle_t xQueueOA;
+//QueueHandle_t xQueueOA;
 
-#endif /* RTOSII_RTOS_II_TP2_INC_OA_H_ */
+#endif /* OA_H_ */
