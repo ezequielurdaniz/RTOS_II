@@ -193,6 +193,7 @@ void TimeoutCallback(TimerHandle_t xTimer){
 void EliminaBloqueMemoriaDinamica(){
 
 	struct node *temp;
+	int TamCola;
 	// borro la memoria dinamica
 	// Problema resuelto : se borro el bloque de memoria para no dejar basura en la proxima
 	// transaccion
@@ -204,11 +205,10 @@ void EliminaBloqueMemoriaDinamica(){
 	front = front->link;
 	vPortFree(temp);
 */
-	memset(&tempInstMayus->datos[0], 0, sizeof(tempInstMayus->datos));                     // clear the array
+
+	memset(&tempInstMayus->datos[0], 0, sizeof(tempInstMayus->datos));
 
 	vPortFree(tempInstMayus);
-
-
 
 
 }

@@ -88,7 +88,7 @@ bool_t ActiveObject_Init( Active_Object_t* Obj ) {
 	 	  xReturned = xTaskCreate(
 	 		  AO_Minus,
 	 	      (const char *)"AO_Mayusculizar",
-	 	      configMINIMAL_STACK_SIZE*2,
+	 	      configMINIMAL_STACK_SIZE,
 	 		  Obj,
 	 	      tskIDLE_PRIORITY+1,
 	 	      &Obj->xHandleOA

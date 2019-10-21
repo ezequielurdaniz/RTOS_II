@@ -83,7 +83,6 @@ int TamanioCola();
 void EnvioMensajeUART(char * str, int indice);
 uint8_t ObtenerComando();
 uint8_t ObtenerCantidadCaracteres();
-void CreaElementoColaInstancias();
 
 /*=====[Prototypes (declarations) of public interrupt functions]=============*/
 

@@ -116,38 +116,6 @@ uint8_t ObtenerCantidadCaracteres(){
       return indice;
 }
 
-/*!
- * @brief  Obtiene la cantidad de elementos en array de memoria dinamica
- *
- * @param[in] void
- *
- * @return  void
- */
-
-void CreaElementoColaInstancias(){
-/*
-    struct Instancias *tempInst;
-
-	// Creo el bloque de memoria dinamica
-	tempInst = (struct Instancias*)pvPortMalloc(sizeof(struct Instancias));
-
-	 // el bloque creado, sera el ultimo de la cola, entonces apuntara a NULL
-	tempInst->linkInst = NULL;
-
-	// Si el primer elemento es NULL, significa que la cola esta vacia, entonces el elemento que creo
-	// sera el primero y el ultimo (FRONT & REAR)
-	// en caso que no sea el primero, lo acomodará al final de la cola dinamica de memoria
-
-	if(frontInst == NULL){
-		frontInst = rearInst = tempInst;
-	}
-	else
-    {
-		rearInst->linkInst = tempInst;
-		rearInst = tempInst;
-	}
-*/
-}
 
 /*!
  * @brief  Tarea Demonio del Driver
@@ -312,8 +280,17 @@ void Driver( void* pvParameters )
                  }
               }
 
+
                  tempInstMayus = front;
-                 front = front->link;
+                 if (front == NULL)
+                 {
+                	 front = rear = NULL;
+                 }
+                 else
+                 {
+                	 front = front->link;
+                 }
+
 
 
    		   }
@@ -419,5 +396,3 @@ void EnvioMensajeUART(char * str, int indice){
 	EliminaBloqueMemoriaDinamica();
 
 }
-
-
