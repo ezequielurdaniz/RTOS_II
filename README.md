@@ -13,15 +13,38 @@ Repositorio de la materia de RTOS II
 ## Aclaraciones:
 
 - Estructura del proyecto:
-  - ejercicio1: Carpeta con el código para TP1
-  - ejercicio2: Carpeta con el código para TP2.
+  - TP1: Carpeta con el código para TP1
+  - TP2: Carpeta con el código para TP2.
   - README.md: Este documento.
 
 ## Consideraciones de diseño
-- Comandos de operación:
 
-  - 0.Convertir los datos recibidos a mayúsculas.
-  - 1.Convertir los datos recibidos a minúsculas.
+- Se utilizaron funciones de cola para la asignación dinámica de memoria (pvPortMalloc), utilizando para la manipulacion de datos el sistema FIFO (First In First Out).
+
+Ej:
+
+// Declaración del nodo para armar la cola de memoria dinamica
+struct node
+{
+    char datos[MEMORIADINAMICA];
+    struct node *link;
+
+}*front, *rear;
+
+// Variable temporal para uso local
+struct node *temp;
+
+// Creo el bloque de memoria dinamica y guardo la posicion de memoria del bloque en un temporal
+temp = (struct node*)pvPortMalloc(sizeof(struct node)); 
+
+- Comandos de operación (TP2):
+
+El primer elemento (luego de los separadores) es el comando para la operación del Objeto Activo (OA). Este comando se extrae del buffer de la memoria dinamica y se acumula en una variable local, indicando sus operaciones:
+
+  0 -> Convertir los datos recibidos a mayúsculas
+  1 -> Convertir los datos recibidos a minúsculas
+  
+Segun el comando recibido, se creará un objeto activo para el proceso de los datos y la devolucion al driver.
 
 # Documentación
 
