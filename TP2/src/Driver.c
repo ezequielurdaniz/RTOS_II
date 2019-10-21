@@ -165,6 +165,8 @@ void Demonio( void* pvParameters )
 
   while(1){
 
+	  // Verificar que corriendomayus es false, le insertar un elemento de la cola de punteros nueva al objeto activo
+
 	 if( Instancia1.xQueueOA != 0 )
 	 {
 		 if(xQueueReceive(Instancia1.xQueueOA, &lValueToSend1, 0)){
@@ -276,19 +278,25 @@ void Driver( void* pvParameters )
    				  // Verifica que la instancia 1 es NULL para poder crear una nueva
    				 Instancia1.ComandoOA=1;
    				 Instancia1.datos = front->datos;
-
+                  // remover el dato de la cola de memoria
    				 resMayus=ActiveObject_Init(&Instancia1);
 
    				 if(resMayus==false){
    					// guarda ese dato en la cola de instancias, en el caso que este ocupada esa tarea
-   					//CreaElementoColaInstancias();
-   			     }else if(resMayus==true){
+   					// CreaElementoColaInstancias();
+   					 // eliminalo de la cola
+   					 // copiarlo en la nueva cola de punteros
 
+   			     }else if(resMayus==true){
+                      // eliminarlo de la cola de memoria dinamica
 
    			     }
 
    			  // Comprueba si el comando es para minusculizar
-              }else if(ComandoDin=='2'){
+              }
+
+
+             else if(ComandoDin=='2'){
 
                  // Verifica que la instancia 1 es NULL para poder crear una nueva
                  Instancia2.ComandoOA=2;
@@ -304,9 +312,8 @@ void Driver( void* pvParameters )
                  }
               }
 
-		    	 tempInstMayus = front;
-		    	 front = front->link;
-
+                 tempInstMayus = front;
+                 front = front->link;
 
 
    		   }

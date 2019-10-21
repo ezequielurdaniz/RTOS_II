@@ -32,6 +32,9 @@ typedef struct {
 	char * datos;
 } Active_Object_t;
 
+
+
+
 Active_Object_t Instancia1;
 Active_Object_t Instancia2;
 

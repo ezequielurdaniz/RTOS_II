@@ -198,15 +198,15 @@ void EliminaBloqueMemoriaDinamica(){
 	// transaccion
 	uartCallbackSet(UART_USB, UART_TRANSMITER_FREE, uartUsbSendCallback, NULL);
 
-
+/*
 	memset(&front->datos[0], 0, sizeof(front->datos));                     // clear the array
 	temp = front;
 	front = front->link;
 	vPortFree(temp);
+*/
+	memset(&tempInstMayus->datos[0], 0, sizeof(tempInstMayus->datos));                     // clear the array
 
-	/*memset(&tempInstMayus->datos[0], 0, sizeof(tempInstMayus->datos));                     // clear the array
-
-	vPortFree(tempInstMayus);*/
+	vPortFree(tempInstMayus);
 
 
 

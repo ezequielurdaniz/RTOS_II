@@ -71,6 +71,7 @@ bool_t ActiveObject_Init( Active_Object_t* Obj ) {
 		  }
 
 		  CorriendoMayus=true;
+
 		  return true;
 	  }
 		 else
