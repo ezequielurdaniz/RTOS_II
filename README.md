@@ -44,10 +44,10 @@ temp = (struct node*)pvPortMalloc(sizeof(struct node));
 - Comandos de operación (TP2):
 
 El primer elemento (luego de los separadores) es el comando para la operación del Objeto Activo (OA). Este comando se extrae del buffer de la memoria dinamica y se acumula en una variable local, indicando sus operaciones:
-
+```
   0 -> Convertir los datos recibidos a mayúsculas
   1 -> Convertir los datos recibidos a minúsculas
-  
+```
 Segun el comando recibido, se creará un objeto activo para el proceso de los datos y la devolucion al driver.
 
 # Documentación
