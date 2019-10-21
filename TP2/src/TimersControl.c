@@ -211,12 +211,15 @@ void EliminaBloqueMemoriaDinamica(){
 		memset(&tempInstMayus->datos[0], 0, sizeof(tempInstMayus->datos));
         vPortFree(tempInstMayus);
         tempInstMayus=NULL;
-	}
-
-	if(tempInstMinus!=NULL){
+	}else if(tempInstMinus!=NULL){
 		memset(&tempInstMinus->datos[0], 0, sizeof(tempInstMinus->datos));
 	    vPortFree(tempInstMinus);
 	    tempInstMinus=NULL;
+	}else
+	{
+		memset(&front->datos[0], 0, sizeof(front->datos));
+		vPortFree(front);
+		front=NULL;
 	}
 
 }
