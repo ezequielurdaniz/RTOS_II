@@ -136,7 +136,9 @@ void AO_Mayus( void* param  ) { 	                        /* Active Object applic
 		 }
 
 		 xStatusTX=xQueueSend(obj->xQueueOA, &obj->datos, 0);
+
 		 CorriendoMayus=false;
+
          // llamar a destructor del obj
          vTaskDelete(obj->xHandleOA);
 
@@ -162,7 +164,9 @@ void AO_Minus( void* param  ) { 	                        /* Active Object applic
 		 }
 
 		 xStatusTX=xQueueSend(obj->xQueueOA, &obj->datos, 0);
+
 		 CorriendoMinus=false;
+
          // llamar a destructor del obj
          vTaskDelete(obj->xHandleOA);
 

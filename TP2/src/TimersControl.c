@@ -193,10 +193,11 @@ void TimeoutCallback(TimerHandle_t xTimer){
 void EliminaBloqueMemoriaDinamica(){
 
 	struct node *temp;
-	int TamCola;
+
 	// borro la memoria dinamica
 	// Problema resuelto : se borro el bloque de memoria para no dejar basura en la proxima
 	// transaccion
+
 	uartCallbackSet(UART_USB, UART_TRANSMITER_FREE, uartUsbSendCallback, NULL);
 
 /*
@@ -206,10 +207,17 @@ void EliminaBloqueMemoriaDinamica(){
 	vPortFree(temp);
 */
 
-	memset(&tempInstMayus->datos[0], 0, sizeof(tempInstMayus->datos));
+	if(tempInstMayus!=NULL){
+		memset(&tempInstMayus->datos[0], 0, sizeof(tempInstMayus->datos));
+        vPortFree(tempInstMayus);
+        tempInstMayus=NULL;
+	}
 
-	vPortFree(tempInstMayus);
-
+	if(tempInstMinus!=NULL){
+		memset(&tempInstMinus->datos[0], 0, sizeof(tempInstMinus->datos));
+	    vPortFree(tempInstMinus);
+	    tempInstMinus=NULL;
+	}
 
 }
 

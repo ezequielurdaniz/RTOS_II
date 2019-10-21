@@ -129,12 +129,12 @@ void Demonio( void* pvParameters )
 {
 
   char* lValueToSend1;	 // el valor a enviar por la cola
-  char* lValueToSend2;
+  char* lValueToSend2;   // el valor a enviar por la cola
 
   while(1){
 
-	  // Verificar que corriendomayus es false, le insertar un elemento de la cola de punteros nueva al objeto activo
-
+     // Verifica si llegan datos por las Queue desde el Objeto Activo, tanto de mayusculizar como de
+	 // minusculizar
 	 if( Instancia1.xQueueOA != 0 )
 	 {
 		 if(xQueueReceive(Instancia1.xQueueOA, &lValueToSend1, 0)){
@@ -203,6 +203,9 @@ void Driver( void* pvParameters )
 	bool_t resMayus;
 	bool_t resMinus;
 
+	tempInstMayus=NULL;
+	tempInstMinus=NULL;
+
     for( ;; ){
 
        // Espera que se agregue un paquete en la cola dinamimca de memoria
@@ -256,17 +259,25 @@ void Driver( void* pvParameters )
    					 // copiarlo en la nueva cola de punteros
 
    			     }else if(resMayus==true){
-                      // eliminarlo de la cola de memoria dinamica
+                      // eliminarlo de la cola de memoria dinamica, mueve los punteros de la cola
+   			    	  tempInstMayus = front;
 
+   			    	  if (front == NULL)
+   			    	  {
+   			    	     front = rear = NULL;
+   			    	  }
+   			    	  else
+   			    	  {
+   			    	     front = front->link;
+   			    	  }
    			     }
 
    			  // Comprueba si el comando es para minusculizar
               }
 
-
              else if(ComandoDin=='2'){
 
-                 // Verifica que la instancia 1 es NULL para poder crear una nueva
+                 // Verifica que la instancia 2 es NULL para poder crear una nueva
                  Instancia2.ComandoOA=2;
                  Instancia2.datos = front->datos;
 
@@ -275,23 +286,20 @@ void Driver( void* pvParameters )
                  if(resMinus==false){
                 	 // guarda ese dato en la cola de instancias, en el caso que este ocupada esa tarea
 
-                 }else if(resMinus==false){
+                 }else if(resMinus==true){
+                	  // eliminarlo de la cola de memoria dinamica, mueve los punteros de la cola
+  			    	  tempInstMinus = front;
 
+  			    	  if (front == NULL)
+  			    	  {
+  			    	     front = rear = NULL;
+  			    	  }
+  			    	  else
+  			    	  {
+  			    	     front = front->link;
+  			    	  }
                  }
               }
-
-
-                 tempInstMayus = front;
-                 if (front == NULL)
-                 {
-                	 front = rear = NULL;
-                 }
-                 else
-                 {
-                	 front = front->link;
-                 }
-
-
 
    		   }
    		   else
@@ -306,9 +314,6 @@ void Driver( void* pvParameters )
    	       // Llego un paquete con mal CRC8, devuelvo error por el puerto
    	    	EnvioErrorUart();
    	    }
-
-   	//EliminaBloqueMemoriaDinamica();
-
     }
 }
 
