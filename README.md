@@ -24,18 +24,18 @@ Repositorio de la materia de RTOS II
 Ej:
 
 // Declaración del nodo para armar la cola de memoria dinamica
-struct node
+* struct node
 {
     char datos[MEMORIADINAMICA];
     struct node *link;
 
 }*front, *rear;
 
-// Variable temporal para uso local
-struct node *temp;
+* // Variable temporal para uso local
+* struct node *temp;
 
-// Creo el bloque de memoria dinamica y guardo la posicion de memoria del bloque en un temporal
-temp = (struct node*)pvPortMalloc(sizeof(struct node)); 
+* // Creo el bloque de memoria dinamica y guardo la posicion de memoria del bloque en un temporal
+* temp = (struct node*)pvPortMalloc(sizeof(struct node)); 
 
 - Comandos de operación (TP2):
 
