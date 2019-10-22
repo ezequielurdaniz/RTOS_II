@@ -129,7 +129,7 @@ struct node
 
 
 ```
-### Estructura del programa
+## Estructura del programa
 ```
 ```
 * Inicializaciones -----> de placa, 
@@ -164,7 +164,7 @@ struct node
 ## Funciones:
 
 
-### Funciones del programa anterior
+## Funciones del programa anterior
 ```
 void uartDriverInit(uartMap_t uart): Inicializacion de la UART
 ```
@@ -236,12 +236,6 @@ void AO_Mayus( void* param  ): función de mayusculizar.
 ```
 ```
 void AO_Minus( void* param  ): función de minusculizar.
-```
-```
-uint8_t ObtenerComando():
-```
-```
-uint8_t ObtenerComando():
 ```
 
 
