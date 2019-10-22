@@ -128,29 +128,29 @@ struct node
 
 
 
-```
+
 ## Estructura del programa
-```
+
 ```
 * Inicializaciones -----> de placa, 
       main.c       -----> timers, 
-                   -----> colaS 
+                   -----> colas 
                    -----> creación de tareas DRIVER y DEMONIO
 
-* TimersControl.c ------> Aqui estan las funciones de los timers y sus condiciones 
+* TimersControl.c ------> Aquí estan las funciones de los timers y sus condiciones 
 
-* Callbacks.c -----> Maquina de estados para la recepción de datos
+* Callbacks.c -----> Máquina de estados para la recepción de datos
               -----> Envio y Recepsión del FRAME
                 
 
 
 * Driver.c ----> Creación de la memoria dinámica
            ----> Recepción de los datos de la capa 2 por cola
-           ----> Validacion de CRC
+           ----> Validación de CRC
            ----> Validación de tipo de char (letras)
-           ----> Analisis del comando para conversion
+           ----> Análisis del comando para conversión
            ----> Llamado del Objeto Activo
-           ----> devolucion de datos a la capa 2
+           ----> devolución de datos a la capa 2
            ----> Liberación de memoria dinámica
 
 * OA.c  -----> Estructura para el pasaje de datos 
@@ -165,6 +165,7 @@ struct node
 
 
 ## Funciones del programa anterior
+
 ```
 void uartDriverInit(uartMap_t uart): Inicializacion de la UART
 ```
@@ -215,7 +216,8 @@ Estados de la maquina:
             ERROR LIMITE
 
 ```
-### Funciones del TP2
+
+## Funciones del TP2
 
 
 
