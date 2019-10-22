@@ -20,11 +20,11 @@ Repositorio de la materia de RTOS II
   - README.md: Este documento.
 
 ## Consideraciones de diseño
-- Comandos de operación: )PARA EL TP2
+- Comandos de operación: PARA EL TP2
 
   - 0.Convertir los datos recibidos a mayúsculas.
   - 1.Convertir los datos recibidos a minúsculas.
-  - Incluir los simbolos de corchete de apertura y fin para el FRAME
+  - Incluir los simbolos de corchete de apertura y cierre para el FRAME
 
 # Documentación
 
