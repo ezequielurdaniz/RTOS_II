@@ -228,17 +228,6 @@ void Driver( void* pvParameters )
 
    		   indice--; // acomodo el indice eliminando el CRC de la cantidad de datos de la cola dinamica
 
-   		   /*
-   		   *
-   		   ComandoDin=front->datos[0];
-
-   		   // Acomoda los datos para seleccionar solo los mismos y pisar el comando en la cola de memoria dinamica
-   		   for(int i = 0 ; i < strlen(front->datos); i++){
-   		       front->datos[i] = front->datos[i+1];
-   		    }
-             indice--; // acomodo el indice eliminando el CRC de la cantidad de datos de la cola dinamica
-
-*/
    	 	   /* Llego un paquete bueno, paso a la siguiente capa */
    		   // Sobreescribo el caracter del CRC8 por el \0
    		   front->datos[indice -1] = '\0';
