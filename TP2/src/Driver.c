@@ -75,26 +75,26 @@ void esperar_paquete(){
 /*!
  * @brief  Obtiene el Comando de la cola dinamica
  *
- * @param[in] void
+ * @param[in] struct node *
  *
- * @return  char
+ * @return  uint8_t
  */
 
-uint8_t ObtenerComando(){
+uint8_t ObtenerComando(struct node *temp){
 
 	// Variable local para proceso del comando
-	uint8_t ComandoOA;
+	uint8_t ComandoDinamic;
 
 	// El primer elemento de la cola dinamica es el comando
-	ComandoOA=front->datos[0];
+	ComandoDinamic=temp->datos[0];
 
     // Acomoda los datos para seleccionar solo los mismos y pisar el comando en la cola de memoria dinamica
-    for(int i = 0 ; i < strlen(front->datos); i++){
-        front->datos[i] = front->datos[i+1];
+    for(int i = 0 ; i < strlen(temp->datos); i++){
+    	temp->datos[i] = temp->datos[i+1];
     }
 
     // devuelve el comando OA
-	return ComandoOA;
+	return ComandoDinamic;
 }
 
 /*!
@@ -111,7 +111,7 @@ uint8_t ObtenerCantidadCaracteres(){
       uint8_t indice;
 
       indice = strlen(front->datos);
-      indice--; // acomodo el indice
+      indice--;
 
       return indice;
 }
@@ -211,14 +211,6 @@ void Driver( void* pvParameters )
        // Espera que se agregue un paquete en la cola dinamimca de memoria
        while(front==NULL);
 
-       // El primer elemento de la cola dinamica es el comando
-       ComandoDin=front->datos[0];
-
-       // Acomoda los datos para seleccionar solo los mismos y pisar el comando en la cola de memoria dinamica
-       for(int i = 0 ; i < strlen(front->datos); i++){
-           front->datos[i] = front->datos[i+1];
-       }
-
        // Guardo en indice la cantidad de datos que recibi por el puerto serie
        indice=ObtenerCantidadCaracteres();
 
@@ -229,6 +221,24 @@ void Driver( void* pvParameters )
    	   // chequeo que el CRC8 calculado sea igual al CRC8 entrante con los datos por el puerto serie
    	   if(crc_temp_rx == front->datos[indice-1]){
 
+   		   // Extraigo el Comando
+   		   // El primer elemento de la cola dinamica es el comando
+
+   		   ComandoDin=ObtenerComando(front);
+
+   		   indice--; // acomodo el indice eliminando el CRC de la cantidad de datos de la cola dinamica
+
+   		   /*
+   		   *
+   		   ComandoDin=front->datos[0];
+
+   		   // Acomoda los datos para seleccionar solo los mismos y pisar el comando en la cola de memoria dinamica
+   		   for(int i = 0 ; i < strlen(front->datos); i++){
+   		       front->datos[i] = front->datos[i+1];
+   		    }
+             indice--; // acomodo el indice eliminando el CRC de la cantidad de datos de la cola dinamica
+
+*/
    	 	   /* Llego un paquete bueno, paso a la siguiente capa */
    		   // Sobreescribo el caracter del CRC8 por el \0
    		   front->datos[indice -1] = '\0';
